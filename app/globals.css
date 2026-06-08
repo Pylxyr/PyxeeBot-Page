@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --bg-1:#0b0f12;
+  --bg-2:#0f1720;
+  --glass: rgba(255,255,255,0.04);
+}
+
+html,body,#root{height:100%;}
+body{
+  @apply bg-gradient-to-b from-[#040406] via-[#071018] to-[#071018] text-slate-100 antialiased;
+  background-color:var(--bg-1);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px);
+}
+
+.neon-text {
+  background: linear-gradient(90deg, #8A2BE2, #00E5FF, #FF2D95);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glow {
+  box-shadow: 0 6px 30px rgba(138,43,226,0.08), 0 0 40px rgba(0,229,255,0.04);
+}
+
+.terminal {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+  font-size: 0.9rem;
+}
