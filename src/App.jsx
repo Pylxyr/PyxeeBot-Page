@@ -249,7 +249,6 @@ function NowPlayingMockup() {
   return (
     <div className="hero-right">
       <div className="discord-window">
-        {/* macOS-style titlebar */}
         <div className="discord-titlebar">
           <span className="discord-dot red" />
           <span className="discord-dot yellow" />
@@ -258,13 +257,11 @@ function NowPlayingMockup() {
         </div>
 
         <div className="discord-body">
-          {/* Server icon sidebar */}
           <div className="discord-sidebar">
             <div className="discord-sidebar-icon">P</div>
             <div className="discord-sidebar-icon small">+</div>
           </div>
 
-          {/* Channel list */}
           <div className="discord-channel-col">
             <div className="discord-channel-header">Text Channels</div>
             {['general', 'music', 'bot-spam'].map(ch => (
@@ -274,7 +271,6 @@ function NowPlayingMockup() {
             ))}
           </div>
 
-          {/* Messages */}
           <div className="discord-main">
             <div className="discord-main-header">
               <span className="discord-channel-hash">#</span>
@@ -290,7 +286,6 @@ function NowPlayingMockup() {
                     <span className="discord-ts">Today at 11:42 PM</span>
                   </div>
 
-                  {/* The NP embed */}
                   <div className="discord-embed">
                     <div className="embed-title">
                       ♪ Now Playing
@@ -384,7 +379,7 @@ function Pipeline() {
         <div className="section-label">How it works</div>
         <h2>From query to audio in four steps.</h2>
         <p style={{ maxWidth: 520 }}>
-          Every <code style={{ color: 'var(--amber)', fontSize: '0.9em', fontFamily: 'var(--font-mono)' }}>!play</code> command
+          Every <code style={{ color: 'var(--accent)', fontSize: '0.9em', fontFamily: 'var(--font-mono)' }}>!play</code> command
           runs through the same pipeline — scoring filters out live recordings,
           covers, and compilations before the stream URL ever resolves.
         </p>
@@ -446,7 +441,7 @@ function Scoring() {
         <h2>Every candidate is ranked, not just picked.</h2>
         <p style={{ maxWidth: 560 }}>
           The engine runs each YouTube result through boost and penalty signals simultaneously.
-          Use <code style={{ color: 'var(--amber)', fontSize: '0.9em', fontFamily: 'var(--font-mono)' }}>!why</code> after
+          Use <code style={{ color: 'var(--accent)', fontSize: '0.9em', fontFamily: 'var(--font-mono)' }}>!why</code> after
           any search to see the full component-level breakdown for your last query.
         </p>
       </div>
@@ -475,12 +470,12 @@ function Scoring() {
               </div>
             </div>
           ))}
-          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--bg-panel)', border: '1px solid var(--border)', borderLeft: '2px solid var(--amber)', borderRadius: '0 6px 6px 0' }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--amber)', marginBottom: '0.4rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--bg-panel)', border: '1px solid var(--border)', borderLeft: '2px solid var(--accent)', borderRadius: '0 6px 6px 0' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--accent)', marginBottom: '0.4rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               Curation mode
             </div>
             <div style={{ fontSize: '0.83rem', color: 'var(--fg-muted)', lineHeight: 1.6 }}>
-              When <code style={{ color: 'var(--amber)', fontFamily: 'var(--font-mono)', fontSize: '0.85em' }}>!vibe</code> is
+              When <code style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '0.85em' }}>!vibe</code> is
               active, live/session/festival tokens carry <strong style={{ color: 'var(--fg)' }}>3× the penalty weight</strong> to keep
               discovered tracks studio-quality.
             </div>
@@ -517,7 +512,7 @@ function Commands() {
       <div ref={ref} className={`reveal${visible ? ' visible' : ''}`}>
         <div className="section-label">Reference</div>
         <h2>Commands</h2>
-        <p>Default prefix is <code style={{ color: 'var(--amber)', fontFamily: 'var(--font-mono)', fontSize: '0.9em' }}>!</code>. Configurable per server.</p>
+        <p>Default prefix is <code style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '0.9em' }}>!</code>. Configurable per server.</p>
       </div>
 
       <div className={`reveal${visible ? ' visible delay-1' : ''}`}>
@@ -644,7 +639,7 @@ function Config() {
         <div className="section-label">Configuration</div>
         <h2>All environment variables.</h2>
         <p className="config-note">
-          Copy <code style={{ color: 'var(--amber)', fontFamily: 'var(--font-mono)', fontSize: '0.9em' }}>.env.example</code> from
+          Copy <code style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '0.9em' }}>.env.example</code> from
           the repo root and fill in your values. Only <code style={{ color: '#f87171', fontFamily: 'var(--font-mono)', fontSize: '0.9em' }}>DISCORD_TOKEN</code> is required.
         </p>
       </div>
