@@ -5,10 +5,11 @@ const BASE = import.meta.env.BASE_URL
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const DEMO_TRACKS = [
-  { title: 'Blinding Lights',  artist: 'The Weeknd',     dur: 202 },
-  { title: 'As It Was',        artist: 'Harry Styles',   dur: 167 },
-  { title: 'Heat Waves',       artist: 'Glass Animals',  dur: 238 },
-  { title: 'Levitating',       artist: 'Dua Lipa',       dur: 203 },
+  { title: 'Saturn',                artist: 'ZUTOMAYO',              dur: 250 },
+  { title: 'Spring Thief',          artist: 'Yorushika',             dur: 290 },
+  { title: 'Racing into the Night', artist: 'YOASOBI',               dur: 261 },
+  { title: 'Pastel Rain',           artist: 'Sangatsu no Phantasia', dur: 212 },
+  { title: 'Usseewa',               artist: 'Ado',                   dur: 204 },
 ]
 
 const FEATURES = [
