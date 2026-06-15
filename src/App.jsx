@@ -259,7 +259,7 @@ function NowPlayingMockup() {
 
         <div className="discord-body">
           <div className="discord-sidebar">
-            <div className="discord-sidebar-icon">P</div>
+            <div className="discord-sidebar-icon"><img src={`${BASE}assets/logo.png`} alt="PyxeeBot" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
             <div className="discord-sidebar-icon small">+</div>
           </div>
 
@@ -279,7 +279,7 @@ function NowPlayingMockup() {
             </div>
             <div className="discord-messages">
               <div className="discord-msg">
-                <div className="discord-avatar">P</div>
+                <div className="discord-avatar"><img src={`${BASE}assets/logo.png`} alt="PyxeeBot" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
                 <div className="discord-msg-body">
                   <div className="discord-msg-meta">
                     <span className="discord-bot-name">PyxeeBot</span>
