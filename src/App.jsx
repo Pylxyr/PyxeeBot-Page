@@ -21,7 +21,7 @@ const FEATURES = [
   {
     mark: 'Curation',
     title: 'Last.fm Vibe Mode',
-    desc: '!vibe discovers similar tracks via Last.fm\'s similarity API, sorted by match confidence. Review and deselect before queuing. Auto-refills when the queue runs low.',
+    desc: '!vibe discovers similar tracks via Last.fm\'s similarity API, sorted by match confidence. Review and deselect before queuing. Auto-refills when the queue runs low during an active vibe session.',
   },
   {
     mark: 'Pipeline',
