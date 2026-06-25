@@ -26,7 +26,7 @@ const FEATURES = [
   {
     mark: 'Pipeline',
     title: 'URL Pre-resolution',
-    desc: 'Stream URLs for the next 3 tracks are resolved in the background as soon as they\'re enqueued. No gap between tracks. No buffering wait at track start.',
+    desc: 'The next track\'s stream URL is resolved in the background as soon as it\'s enqueued. No gap between tracks, no buffering wait at track start. Configurable via YTDLP_PREFETCH_COUNT.',
   },
   {
     mark: 'Playback',
@@ -42,6 +42,16 @@ const FEATURES = [
     mark: 'Debug',
     title: 'Score Transparency',
     desc: '!why shows exactly how the last search\'s candidates were ranked — every component score, DM-able as a full breakdown. Useful for tuning queries.',
+  },
+  {
+    mark: 'Automation',
+    title: 'Autoplay Mode',
+    desc: 'Enable per-server with !autoplay. When the queue empties, the bot silently fetches a similar track via Last.fm using the last completed track as the seed — no !vibe session required.',
+  },
+  {
+    mark: 'Server',
+    title: '24/7 & Per-server Controls',
+    desc: '!stay keeps the bot connected even when the queue is empty. Per-server command prefix (!setprefix), DJ role (!setdj), and all toggles survive restarts via SQLite.',
   },
 ]
 
@@ -79,7 +89,7 @@ const PIPELINE_STEPS = [
   },
   {
     n: '04', title: 'Pre-resolve URL',
-    detail: ['stream ready\n', 'next 3 tracks', '\nin background'],
+    detail: ['stream ready\n', 'next track', '\nin background'],
     hl: [1],
   },
 ]
@@ -210,6 +220,7 @@ function Nav({ theme, setTheme }) {
       <div className="nav-right">
         <a href="#features" className="nav-link">Features</a>
         <a href="#commands" className="nav-link">Commands</a>
+        <a href="#config"   className="nav-link">Config</a>
         <a href="#install"  className="nav-link">Install</a>
         <button className="theme-btn" onClick={toggle} title="Toggle theme">
           {theme === 'dark' ? '☀' : '☽'}
@@ -230,6 +241,7 @@ function NowPlayingMockup() {
   const [idx, setIdx]         = useState(0)
   const [progress, setProgress] = useState(27)
   const [playing, setPlaying]   = useState(true)
+  const [loopOn, setLoopOn]     = useState(false)
 
   const track     = DEMO_TRACKS[idx]
   const nextTrack = DEMO_TRACKS[(idx + 1) % DEMO_TRACKS.length]
@@ -318,7 +330,11 @@ function NowPlayingMockup() {
                         {playing ? '⏸' : '▶'}
                       </button>
                       <button className="embed-ctrl" onClick={skip}  title="Skip">⏭</button>
-                      <button className="embed-ctrl" title="Loop">⟳</button>
+                      <button
+                        className={`embed-ctrl${loopOn ? ' primary' : ''}`}
+                        onClick={() => setLoopOn(l => !l)}
+                        title={loopOn ? 'Loop: on' : 'Loop: off'}
+                      >⟳</button>
                       <button className="embed-ctrl" title="Queue">☰</button>
                     </div>
 
@@ -360,6 +376,7 @@ function Hero() {
         <div className="hero-meta">
           <div className="meta-item ok"><div className="meta-dot" /> Python 3.11+</div>
           <div className="meta-item ok"><div className="meta-dot" /> discord.py 2.7.1</div>
+          <div className="meta-item ok"><div className="meta-dot" /> yt-dlp 2026.06.09</div>
           <div className="meta-item"><div className="meta-dot" /> MIT License</div>
           <div className="meta-item"><div className="meta-dot" /> Self-hosted</div>
         </div>
@@ -395,7 +412,10 @@ function Pipeline() {
       <div className={`pipeline-steps reveal${visible ? ' visible delay-1' : ''}`}
            ref={ref}>
         {PIPELINE_STEPS.map((step, i) => (
-          <div key={step.n} className={`pipeline-step${active === i ? ' active' : ''}`}>
+          <div key={step.n}
+               className={`pipeline-step${active === i ? ' active' : ''}`}
+               onClick={() => setActive(i)}
+               style={{ cursor: 'pointer' }}>
             <div className="pipeline-num">{step.n}</div>
             <div className="pipeline-title">{step.title}</div>
             <div className="pipeline-detail">
@@ -599,9 +619,9 @@ function StepNote({ noteKey }) {
   )
   if (noteKey === 'systemd') return (
     <div className="env-note">
-      For Linux servers, a <strong>systemd service file</strong> is documented in the{' '}
-      <a href="https://github.com/Pylxyr/PyxeeBot#readme" target="_blank" rel="noreferrer">README</a>{' '}
-      for running PyxeeBot as a persistent background service.
+      On Ubuntu/Oracle Cloud: <code>bash deploy/setup_oracle.sh</code> handles this step automatically — it installs the service, enables it, and starts the bot. For manual setup, the service file is at{' '}
+      <code>deploy/musicbot.service</code> and documented in the{' '}
+      <a href="https://github.com/Pylxyr/PyxeeBot#readme" target="_blank" rel="noreferrer">README</a>.
     </div>
   )
   return null
