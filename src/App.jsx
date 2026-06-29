@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const BASE = import.meta.env.BASE_URL
 
-// ─── Data ────────────────────────────────────────────────────────────────────
+// ─── Data ─────────────────────────────────────────────────────────────────────
 
 const DEMO_TRACKS = [
   { title: 'Saturn',                artist: 'ZUTOMAYO',              dur: 250 },
@@ -12,63 +12,72 @@ const DEMO_TRACKS = [
   { title: 'Usseewa',               artist: 'Ado',                   dur: 204 },
 ]
 
+const WAVEFORM_HEIGHTS = [3, 8, 14, 9, 5, 18, 12, 7, 16, 4, 11, 15, 6, 10, 13, 5]
+
+const STATS = [
+  { n: '124', label: 'tests passing' },
+  { n: '20+', label: 'scoring signals' },
+  { n: '64', label: 'kbps Opus' },
+  { n: '3.11+', label: 'Python' },
+]
+
 const FEATURES = [
   {
-    mark: 'Search',
+    mark: 'Search', icon: '⊙',
     title: 'Custom Scoring Engine',
     desc: 'Each YouTube candidate is scored across 20+ factors — token overlap, sequence similarity, anchor phrases, uploader signals, live/cover penalties. You get the studio version, not the festival recording.',
   },
   {
-    mark: 'Curation',
+    mark: 'Curation', icon: '≋',
     title: 'Last.fm Vibe Mode',
-    desc: '!vibe discovers similar tracks via Last.fm\'s similarity API, sorted by match confidence. Review and deselect before queuing. Auto-refills when the queue runs low during an active vibe session.',
+    desc: '`!vibe` discovers similar tracks via Last.fm\'s similarity API, sorted by match confidence. Review and deselect before queuing. Auto-refills when the queue runs low during an active vibe session.',
   },
   {
-    mark: 'Pipeline',
+    mark: 'Pipeline', icon: '→',
     title: 'URL Pre-resolution',
-    desc: 'The next track\'s stream URL is resolved in the background as soon as it\'s enqueued. No gap between tracks, no buffering wait at track start. Configurable via YTDLP_PREFETCH_COUNT.',
+    desc: 'The next track\'s stream URL is resolved in the background as soon as it\'s enqueued. No gap between tracks. The FFmpeg subprocess starts immediately before playback — no pre-buffering artifacts.',
   },
   {
-    mark: 'Playback',
+    mark: 'Playback', icon: '▶',
     title: 'Live Now-Playing Panel',
     desc: 'A persistent embed with a real-time progress bar and inline controls — skip, pause, loop, queue view. Refreshes only when something visible actually changed.',
   },
   {
-    mark: 'Persistence',
+    mark: 'Persistence', icon: '◈',
     title: 'Queue Snapshots',
     desc: 'The queue is written to SQLite with a debounce on every mutation. Survives a restart. Per-guild prefix, DJ role, and playlist library stored alongside it.',
   },
   {
-    mark: 'Debug',
+    mark: 'Debug', icon: '⌬',
     title: 'Score Transparency',
-    desc: '!why shows exactly how the last search\'s candidates were ranked — every component score, DM-able as a full breakdown. Useful for tuning queries.',
+    desc: '`!why` shows exactly how the last search\'s candidates were ranked — every component score, DM-able as a full breakdown. Useful for tuning queries.',
   },
   {
-    mark: 'Automation',
+    mark: 'Automation', icon: '↻',
     title: 'Autoplay Mode',
-    desc: 'Enable per-server with !autoplay. When the queue empties, the bot silently fetches a similar track via Last.fm using the last completed track as the seed — no !vibe session required.',
+    desc: 'Enable per-server with `!autoplay`. When the queue empties, the bot silently fetches a similar track via Last.fm using the last completed track as the seed — no `!vibe` session required.',
   },
   {
-    mark: 'Server',
+    mark: 'Server', icon: '⬡',
     title: '24/7 & Per-server Controls',
-    desc: '!stay keeps the bot connected even when the queue is empty. Per-server command prefix (!setprefix), DJ role (!setdj), and all toggles survive restarts via SQLite.',
+    desc: '`!stay` keeps the bot connected even when the queue is empty. Per-server command prefix, DJ role, and all toggles survive restarts via SQLite.',
   },
 ]
 
 const BOOST_SIGNALS = [
-  { name: 'Token overlap',    desc: 'Query words found in title and uploader' },
-  { name: 'Sequence ratio',   desc: 'Full string similarity via rapidfuzz' },
-  { name: 'Anchor phrases',   desc: 'Artist name extracted via cross-candidate analysis' },
-  { name: 'Topic channel',    desc: 'YouTube Music auto-channels — always studio version' },
-  { name: 'Label signals',    desc: 'Known uploaders: HYBE, SMTOWN, Avex, Victor, Lantis…' },
-  { name: 'JP original',      desc: 'Boosts CJK-title uploads for J-pop / anime searches' },
-  { name: 'View count',       desc: 'Log-scaled, capped to avoid pure popularity bias' },
+  { name: 'Token overlap',    desc: 'Query words found in title and uploader',             w: 90 },
+  { name: 'Sequence ratio',   desc: 'Full string similarity via RapidFuzz',                w: 75 },
+  { name: 'Anchor phrases',   desc: 'Artist name extracted via cross-candidate analysis',  w: 70 },
+  { name: 'Topic channel',    desc: 'YouTube Music auto-channels — always studio version', w: 60 },
+  { name: 'Label signals',    desc: 'Known uploaders: HYBE, SMTOWN, Avex, Victor, Lantis…',w: 50 },
+  { name: 'JP original',      desc: 'Boosts CJK-title uploads for J-pop / anime searches', w: 45 },
+  { name: 'View count',       desc: 'Log-scaled, capped to avoid pure popularity bias',    w: 35 },
 ]
 
 const PENALTY_SIGNALS = [
-  { name: 'Live penalty',     desc: 'Suppresses festival recordings, BBC sessions, TV performances' },
-  { name: 'Cover penalty',    desc: 'Suppresses piano/guitar covers, karaoke, English covers' },
-  { name: 'Duration sanity',  desc: 'Penalises >15 min compilations and <60 s clips' },
+  { name: 'Live penalty',     desc: 'Suppresses festival recordings, BBC sessions, TV performances', w: 80 },
+  { name: 'Cover penalty',    desc: 'Suppresses piano/guitar covers, karaoke, English covers',       w: 65 },
+  { name: 'Duration sanity',  desc: 'Penalises >15 min compilations and <60 s clips',                w: 50 },
 ]
 
 const PIPELINE_STEPS = [
@@ -112,40 +121,41 @@ const COMMANDS = {
     { cmd: '!leave',      args: '',               alias: 'disconnect',           desc: 'Disconnect and clear the active session.' },
   ],
   queue: [
-    { cmd: '!queue',      args: '',               alias: 'q',                    desc: 'Show the current queue with pagination and total duration.' },
-    { cmd: '!remove',     args: '<index>',        alias: '',                     desc: 'Remove a track by its queue position.' },
-    { cmd: '!clear',      args: '',               alias: 'DJ only',              desc: 'Flush all queued tracks.' },
-    { cmd: '!shuffle',    args: '',               alias: 'DJ only',              desc: 'Randomise the upcoming queue.' },
-    { cmd: '!move',       args: '<from> <to>',    alias: 'DJ only',              desc: 'Move a track from one position to another.' },
-    { cmd: '!skipto',     args: '<position>',     alias: 'DJ only',              desc: 'Jump to a queue position, dropping everything before it.' },
-    { cmd: '!qsearch',    args: '<keyword>',      alias: 'qs',                   desc: 'Search for a keyword within the current queue.' },
-    { cmd: '!history',    args: '',               alias: '',                     desc: 'Show recently played tracks this session.' },
-    { cmd: '!toptracks',  args: '',               alias: 'top',                  desc: 'Show the all-time most-played tracks for this server.' },
+    { cmd: '!queue',         args: '',               alias: 'q',          desc: 'Show the current queue with pagination and total duration.' },
+    { cmd: '!remove',        args: '<index>',        alias: '',           desc: 'Remove a track by its queue position.' },
+    { cmd: '!clear',         args: '',               alias: 'DJ only',    desc: 'Flush all queued tracks.' },
+    { cmd: '!shuffle',       args: '',               alias: 'DJ only',    desc: 'Randomise the upcoming queue.' },
+    { cmd: '!move',          args: '<from> <to>',    alias: 'DJ only',    desc: 'Move a track from one position to another.' },
+    { cmd: '!skipto',        args: '<position>',     alias: 'DJ only',    desc: 'Jump to a queue position, dropping everything before it.' },
+    { cmd: '!qsearch',       args: '<keyword>',      alias: 'qs',         desc: 'Search for a keyword within the current queue.' },
+    { cmd: '!history',       args: '',               alias: '',           desc: 'Show recently played tracks this session.' },
+    { cmd: '!toptracks',     args: '',               alias: 'top',        desc: 'Show the all-time most-played tracks for this server.' },
+    { cmd: '!toprequestors', args: '',               alias: 'topreqs',    desc: 'Show the all-time top track requestors for this server.' },
   ],
   playlists: [
-    { cmd: '!playlist save',   args: '<name>', alias: '',          desc: 'Save the current queue as a named server playlist.' },
-    { cmd: '!playlist load',   args: '<name>', alias: '',          desc: 'Load a saved playlist into the queue.' },
-    { cmd: '!playlist list',   args: '',       alias: '',          desc: 'List all saved playlists for this server.' },
-    { cmd: '!playlist show',   args: '<name>', alias: '',          desc: 'Show the tracks in a saved playlist.' },
-    { cmd: '!playlist delete', args: '<name>', alias: 'DJ only',   desc: 'Delete a saved playlist.' },
+    { cmd: '!playlist save',   args: '<name>', alias: '',        desc: 'Save the current queue as a named server playlist.' },
+    { cmd: '!playlist load',   args: '<name>', alias: '',        desc: 'Load a saved playlist into the queue.' },
+    { cmd: '!playlist list',   args: '',       alias: '',        desc: 'List all saved playlists for this server.' },
+    { cmd: '!playlist show',   args: '<name>', alias: '',        desc: 'Show the tracks in a saved playlist.' },
+    { cmd: '!playlist delete', args: '<name>', alias: 'DJ only', desc: 'Delete a saved playlist.' },
   ],
   curation: [
-    { cmd: '!vibe',       args: '<query>', alias: 'vb',    desc: 'Discover similar tracks via Last.fm. Opens a curation panel to review before queuing. Requires a Last.fm API key.' },
-    { cmd: '!vibe-save',  args: '<name>',  alias: 'vsave', desc: 'Save the active curation session as a named playlist.' },
-    { cmd: '!vibe-load',  args: '<name>',  alias: 'vload', desc: 'Queue a saved curated playlist.' },
-    { cmd: '!vibe-list',  args: '',        alias: 'vlist', desc: 'List all saved curated playlists.' },
+    { cmd: '!vibe',       args: '<query>', alias: 'vb · cooldown 15s/guild', desc: 'Discover similar tracks via Last.fm. Opens a curation panel to review before queuing. Requires a Last.fm API key.' },
+    { cmd: '!vibe-save',  args: '<name>',  alias: 'vsave',                   desc: 'Save the active curation session as a named playlist.' },
+    { cmd: '!vibe-load',  args: '<name>',  alias: 'vload',                   desc: 'Queue a saved curated playlist.' },
+    { cmd: '!vibe-list',  args: '',        alias: 'vlist',                   desc: 'List all saved curated playlists.' },
   ],
   admin: [
-    { cmd: '!setdj',    args: '<role>', alias: 'Manage Server', desc: 'Assign a role as the DJ role for protected commands.' },
-    { cmd: '!cleardj',  args: '',       alias: 'Manage Server', desc: 'Remove the configured DJ role.' },
-    { cmd: '!dj',       args: '',       alias: '',              desc: 'Show the current DJ role.' },
-    { cmd: '!setprefix',args: '<prefix>',alias: 'Manage Server',desc: 'Change the command prefix for this server.' },
-    { cmd: '!stay',     args: '',       alias: 'Manage Server', desc: 'Toggle 24/7 mode — bot stays connected when the queue empties.' },
-    { cmd: '!autoplay', args: '',       alias: 'Manage Server', desc: 'Toggle per-server autoplay — queues a similar track via Last.fm when the queue empties.' },
-    { cmd: '!stats',    args: '',       alias: 'owner only',    desc: 'Show bot process stats: versions, guild count, voice connections, memory, latency.' },
-    { cmd: '!why',      args: '',       alias: 'searchdebug, scorewhy', desc: 'Show how the last search\'s candidates were scored. DM yourself a full component-level breakdown.' },
-    { cmd: '!ping',     args: '',       alias: '',              desc: 'Check gateway latency.' },
-    { cmd: '!commands', args: '',       alias: 'cmds',          desc: 'Open the command help menu.' },
+    { cmd: '!setdj',    args: '<role>',   alias: 'Manage Server',         desc: 'Assign a role as the DJ role for protected commands.' },
+    { cmd: '!cleardj',  args: '',         alias: 'Manage Server',         desc: 'Remove the configured DJ role.' },
+    { cmd: '!dj',       args: '',         alias: '',                      desc: 'Show the current DJ role.' },
+    { cmd: '!setprefix',args: '<prefix>', alias: 'Manage Server',         desc: 'Change the command prefix for this server.' },
+    { cmd: '!stay',     args: '',         alias: 'Manage Server',         desc: 'Toggle 24/7 mode — bot stays connected when the queue empties.' },
+    { cmd: '!autoplay', args: '',         alias: 'Manage Server',         desc: 'Toggle per-server autoplay — queues a similar track via Last.fm when the queue empties.' },
+    { cmd: '!stats',    args: '',         alias: 'owner only',            desc: 'Show bot process stats: versions, guild count, voice connections, memory, latency.' },
+    { cmd: '!why',      args: '',         alias: 'searchdebug, scorewhy', desc: 'Show how the last search\'s candidates were scored. DM yourself a full component-level breakdown.' },
+    { cmd: '!ping',     args: '',         alias: '',                      desc: 'Check gateway latency.' },
+    { cmd: '!commands', args: '',         alias: 'cmds',                  desc: 'Open the command help menu.' },
   ],
 }
 
@@ -154,7 +164,9 @@ const CONFIG_VARS = [
   { key: 'LASTFM_API_KEY',                 def: '—',        desc: 'Enables !vibe curation. Free key at last.fm/api.' },
   { key: 'DEFAULT_PREFIX',                 def: '!',        desc: 'Command prefix. Per-server override via !setprefix.' },
   { key: 'BOT_OWNERS',                     def: '—',        desc: 'Comma-separated owner IDs for elevated commands.' },
+  { key: 'BOT_ACTIVITY_URL',               def: 'pylxyr.github.io/…', desc: 'Text shown in the bot\'s Discord status ("Watching …").' },
   { key: 'MAX_QUEUE_SIZE',                 def: '100',      desc: 'Maximum tracks allowed in the queue at once.' },
+  { key: 'MAX_QUEUE_SIZE_PER_USER',        def: '0',        desc: 'Per-user track limit; 0 disables the limit.' },
   { key: 'MAX_PLAYLIST_SIZE',              def: '25',       desc: 'Maximum tracks loaded from a saved playlist.' },
   { key: 'IDLE_TIMEOUT_SECONDS',           def: '180',      desc: 'Disconnect after being idle this many seconds.' },
   { key: 'EMPTY_CHANNEL_TIMEOUT_SECONDS',  def: '60',       desc: 'Disconnect when alone in channel this long.' },
@@ -189,7 +201,7 @@ const INSTALL_STEPS = [
   },
 ]
 
-// ─── Hooks ───────────────────────────────────────────────────────────────────
+// ─── Hooks ────────────────────────────────────────────────────────────────────
 
 function useReveal(threshold = 0.1) {
   const ref = useRef(null)
@@ -207,7 +219,22 @@ function useReveal(threshold = 0.1) {
   return [ref, visible]
 }
 
-// ─── Nav ─────────────────────────────────────────────────────────────────────
+// ─── ScrollProgress ───────────────────────────────────────────────────────────
+
+function ScrollProgress() {
+  const [pct, setPct] = useState(0)
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.documentElement
+      setPct(el.scrollTop / (el.scrollHeight - el.clientHeight) * 100)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  return <div className="scroll-progress" style={{ width: `${pct}%` }} />
+}
+
+// ─── Nav ──────────────────────────────────────────────────────────────────────
 
 function Nav({ theme, setTheme }) {
   const toggle = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
@@ -230,7 +257,23 @@ function Nav({ theme, setTheme }) {
   )
 }
 
-// ─── NowPlayingMockup ────────────────────────────────────────────────────────
+// ─── Waveform ─────────────────────────────────────────────────────────────────
+
+function Waveform({ playing }) {
+  return (
+    <div className={`waveform${playing ? ' playing' : ''}`} aria-hidden="true">
+      {WAVEFORM_HEIGHTS.map((h, i) => (
+        <div
+          key={i}
+          className="waveform-bar"
+          style={{ '--h': `${h}px`, '--i': i }}
+        />
+      ))}
+    </div>
+  )
+}
+
+// ─── NowPlayingMockup ─────────────────────────────────────────────────────────
 
 function fmt(s) {
   const sec = Math.floor(s)
@@ -238,7 +281,7 @@ function fmt(s) {
 }
 
 function NowPlayingMockup() {
-  const [idx, setIdx]         = useState(0)
+  const [idx, setIdx]           = useState(0)
   const [progress, setProgress] = useState(27)
   const [playing, setPlaying]   = useState(true)
   const [loopOn, setLoopOn]     = useState(false)
@@ -252,18 +295,15 @@ function NowPlayingMockup() {
     if (!playing) return
     const id = setInterval(() => {
       setProgress(p => {
-        if (p >= 100) {
-          setIdx(i => (i + 1) % DEMO_TRACKS.length)
-          return 0
-        }
+        if (p >= 100) { setIdx(i => (i + 1) % DEMO_TRACKS.length); return 0 }
         return p + 0.4
       })
     }, 120)
     return () => clearInterval(id)
   }, [playing])
 
-  function skip()  { setIdx(i => (i + 1) % DEMO_TRACKS.length); setProgress(0) }
-  function prev()  { setIdx(i => (i - 1 + DEMO_TRACKS.length) % DEMO_TRACKS.length); setProgress(0) }
+  function skip() { setIdx(i => (i + 1) % DEMO_TRACKS.length); setProgress(0) }
+  function prev() { setIdx(i => (i - 1 + DEMO_TRACKS.length) % DEMO_TRACKS.length); setProgress(0) }
 
   return (
     <div className="hero-right">
@@ -277,7 +317,9 @@ function NowPlayingMockup() {
 
         <div className="discord-body">
           <div className="discord-sidebar">
-            <div className="discord-sidebar-icon"><img src={`${BASE}assets/logo.png`} alt="PyxeeBot" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
+            <div className="discord-sidebar-icon">
+              <img src={`${BASE}assets/logo.png`} alt="PyxeeBot" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
             <div className="discord-sidebar-icon small">+</div>
           </div>
 
@@ -292,12 +334,13 @@ function NowPlayingMockup() {
 
           <div className="discord-main">
             <div className="discord-main-header">
-              <span className="discord-channel-hash">#</span>
-              music
+              <span className="discord-channel-hash">#</span>music
             </div>
             <div className="discord-messages">
               <div className="discord-msg">
-                <div className="discord-avatar"><img src={`${BASE}assets/logo.png`} alt="PyxeeBot" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
+                <div className="discord-avatar">
+                  <img src={`${BASE}assets/logo.png`} alt="PyxeeBot" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
                 <div className="discord-msg-body">
                   <div className="discord-msg-meta">
                     <span className="discord-bot-name">PyxeeBot</span>
@@ -307,8 +350,9 @@ function NowPlayingMockup() {
 
                   <div className="discord-embed">
                     <div className="embed-title">
-                      ♪ Now Playing
-                      <span className="embed-note" style={{marginLeft:'auto'}}>
+                      <Waveform playing={playing} />
+                      <span style={{ marginLeft: '0.5rem' }}>Now Playing</span>
+                      <span className="embed-note" style={{ marginLeft: 'auto' }}>
                         {playing ? '▶ playing' : '⏸ paused'}
                       </span>
                     </div>
@@ -325,11 +369,11 @@ function NowPlayingMockup() {
                     </div>
 
                     <div className="embed-controls">
-                      <button className="embed-ctrl" onClick={prev}  title="Previous">⏮</button>
+                      <button className="embed-ctrl" onClick={prev} title="Previous">⏮</button>
                       <button className="embed-ctrl primary" onClick={() => setPlaying(p => !p)}>
                         {playing ? '⏸' : '▶'}
                       </button>
-                      <button className="embed-ctrl" onClick={skip}  title="Skip">⏭</button>
+                      <button className="embed-ctrl" onClick={skip} title="Skip">⏭</button>
                       <button
                         className={`embed-ctrl${loopOn ? ' primary' : ''}`}
                         onClick={() => setLoopOn(l => !l)}
@@ -355,7 +399,7 @@ function NowPlayingMockup() {
   )
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
+// ─── Hero ──────────────────────────────────────────────────────────────────────
 
 function Hero() {
   return (
@@ -386,6 +430,22 @@ function Hero() {
   )
 }
 
+// ─── StatsRow ─────────────────────────────────────────────────────────────────
+
+function StatsRow() {
+  const [ref, visible] = useReveal(0.2)
+  return (
+    <div ref={ref} className={`stats-row reveal${visible ? ' visible' : ''}`}>
+      {STATS.map((s, i) => (
+        <div key={s.label} className="stat-item" style={{ '--delay': `${i * 0.07}s` }}>
+          <span className="stat-n">{s.n}</span>
+          <span className="stat-label">{s.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── Pipeline ─────────────────────────────────────────────────────────────────
 
 function Pipeline() {
@@ -409,13 +469,13 @@ function Pipeline() {
         </p>
       </div>
 
-      <div className={`pipeline-steps reveal${visible ? ' visible delay-1' : ''}`}
-           ref={ref}>
+      <div className={`pipeline-steps reveal${visible ? ' visible delay-1' : ''}`}>
         {PIPELINE_STEPS.map((step, i) => (
-          <div key={step.n}
-               className={`pipeline-step${active === i ? ' active' : ''}`}
-               onClick={() => setActive(i)}
-               style={{ cursor: 'pointer' }}>
+          <div
+            key={step.n}
+            className={`pipeline-step${active === i ? ' active' : ''}`}
+            onClick={() => setActive(i)}
+          >
             <div className="pipeline-num">{step.n}</div>
             <div className="pipeline-title">{step.title}</div>
             <div className="pipeline-detail">
@@ -447,7 +507,10 @@ function Features() {
       <div className={`features-grid reveal${visible ? ' visible delay-1' : ''}`}>
         {FEATURES.map(f => (
           <div key={f.mark} className="feature-card">
-            <span className="feature-mark">{f.mark}</span>
+            <div className="feature-card-header">
+              <span className="feature-icon">{f.icon}</span>
+              <span className="feature-mark">{f.mark}</span>
+            </div>
             <h3>{f.title}</h3>
             <p dangerouslySetInnerHTML={{ __html: f.desc.replace(/`([^`]+)`/g, '<code>$1</code>') }} />
           </div>
@@ -458,6 +521,17 @@ function Features() {
 }
 
 // ─── Scoring ──────────────────────────────────────────────────────────────────
+
+function SignalBar({ weight, type, visible }) {
+  return (
+    <div className="signal-bar-track">
+      <div
+        className={`signal-bar-fill ${type}`}
+        style={{ width: visible ? `${weight}%` : '0%' }}
+      />
+    </div>
+  )
+}
 
 function Scoring() {
   const [ref, visible] = useReveal()
@@ -479,9 +553,12 @@ function Scoring() {
           {BOOST_SIGNALS.map(s => (
             <div key={s.name} className="signal-row">
               <span className="signal-dot boost" />
-              <div>
-                <div className="signal-name">{s.name}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="signal-name-row">
+                  <span className="signal-name">{s.name}</span>
+                </div>
                 <div className="signal-desc">{s.desc}</div>
+                <SignalBar weight={s.w} type="boost" visible={visible} />
               </div>
             </div>
           ))}
@@ -491,20 +568,19 @@ function Scoring() {
           {PENALTY_SIGNALS.map(s => (
             <div key={s.name} className="signal-row">
               <span className="signal-dot penalty" />
-              <div>
-                <div className="signal-name">{s.name}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="signal-name-row">
+                  <span className="signal-name">{s.name}</span>
+                </div>
                 <div className="signal-desc">{s.desc}</div>
+                <SignalBar weight={s.w} type="penalty" visible={visible} />
               </div>
             </div>
           ))}
-          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--bg-panel)', border: '1px solid var(--border)', borderLeft: '2px solid var(--accent)', borderRadius: '0 6px 6px 0' }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--accent)', marginBottom: '0.4rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              Curation mode
-            </div>
-            <div style={{ fontSize: '0.83rem', color: 'var(--fg-muted)', lineHeight: 1.6 }}>
-              When <code style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '0.85em' }}>!vibe</code> is
-              active, live/session/festival tokens carry <strong style={{ color: 'var(--fg)' }}>3× the penalty weight</strong> to keep
-              discovered tracks studio-quality.
+          <div className="curation-note">
+            <div className="curation-note-label">Curation mode</div>
+            <div className="curation-note-body">
+              When <code>!vibe</code> is active, live/session/festival tokens carry <strong>3× the penalty weight</strong> to keep discovered tracks studio-quality.
             </div>
           </div>
         </div>
@@ -522,8 +598,8 @@ function Commands() {
   const [tab, setTab]     = useState('playback')
   const [query, setQuery] = useState('')
 
-  const rows   = COMMANDS[tab] || []
-  const term   = query.trim().toLowerCase().replace(/^!/, '')
+  const rows     = COMMANDS[tab] || []
+  const term     = query.trim().toLowerCase().replace(/^!/, '')
   const filtered = term
     ? rows.filter(r =>
         r.cmd.toLowerCase().includes(term) ||
@@ -567,9 +643,7 @@ function Commands() {
               onClick={() => switchTab(t)}
             >
               {t.charAt(0).toUpperCase() + t.slice(1)}
-              <span className="cmd-count-badge">
-                ({COMMANDS[t].length})
-              </span>
+              <span className="cmd-count-badge">({COMMANDS[t].length})</span>
             </button>
           ))}
         </div>
@@ -724,9 +798,11 @@ export default function App() {
 
   return (
     <>
+      <ScrollProgress />
       <Nav theme={theme} setTheme={setTheme} />
       <main>
         <Hero />
+        <StatsRow />
         <Pipeline />
         <Features />
         <Scoring />
