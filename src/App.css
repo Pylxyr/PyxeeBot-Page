@@ -542,12 +542,17 @@ h1 em { font-style: italic; color: var(--accent); }
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--accent);
+  white-space: nowrap;
 }
 .embed-note {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   color: rgba(255,255,255,0.4);
   margin-left: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 [data-theme="light"] .embed-note { color: rgba(0,0,0,0.35); }
 .embed-track-title {

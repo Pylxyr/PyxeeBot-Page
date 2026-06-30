@@ -12,7 +12,7 @@ const DEMO_TRACKS = [
   { title: 'Usseewa',               artist: 'Ado',                   dur: 204 },
 ]
 
-const WAVE_HEIGHTS = [3, 8, 14, 9, 5, 18, 12, 7, 16, 4, 11, 15, 6, 10, 13, 5]
+const WAVE_HEIGHTS = [3, 8, 14, 9, 5, 18, 12, 7, 16, 4]
 
 const EQ_HEIGHTS = [20, 35, 55, 42, 70, 85, 60, 45, 72, 90, 65, 48, 78, 55, 38, 62, 80, 50, 35, 58]
 
@@ -419,7 +419,7 @@ function NowPlayingMockup({ onPlayingChange }) {
                     <div className="embed-title">
                       <Waveform playing={playing} />
                       <span className="embed-title-text">Now Playing</span>
-                      <span className="embed-note">{playing ? '▶ playing' : '⏸ paused'}</span>
+                      <span className="embed-note">{playing ? '▶' : '⏸'}</span>
                     </div>
                     <div className="embed-track-title">{track.title}</div>
                     <div className="embed-track-artist">{track.artist} · {fmt(track.dur)}</div>
