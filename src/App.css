@@ -198,6 +198,7 @@ main { overflow: hidden; }
 .hero-left {
   position: relative;
   padding-bottom: 2rem;
+  min-width: 0;
 }
 
 .hero-eyebrow {
@@ -350,6 +351,7 @@ h1 em { font-style: italic; color: var(--accent); }
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  min-width: 0;
 }
 
 .discord-window {
@@ -1163,7 +1165,7 @@ h1 em { font-style: italic; color: var(--accent); }
   box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 18%, transparent);
   z-index: 1;
 }
-.step-body { flex: 1; padding-bottom: 1rem; }
+.step-body { flex: 1; min-width: 0; padding-bottom: 1rem; }
 .step-body h3 { margin-bottom: 0.65rem; font-size: 0.95rem; }
 pre {
   position: relative;
@@ -1307,6 +1309,8 @@ footer {
   #hero { grid-template-columns: 1fr; gap: 2.5rem; padding: 3rem 1.5rem; }
   .hero-right { justify-content: stretch; }
   .discord-window { max-width: 100%; }
+  .discord-sidebar, .discord-channel-col { display: none; }
+  .discord-main { min-width: 0; }
   .features-grid { grid-template-columns: 1fr; }
   .signals-grid  { grid-template-columns: 1fr; }
   .pipeline-steps { grid-template-columns: 1fr 1fr; }
