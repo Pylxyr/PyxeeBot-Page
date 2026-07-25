@@ -1,26 +1,372 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PyxeeBot</title>
-    <meta name="description" content="A self-hosted Discord music bot with a custom search scoring engine and Last.fm curation." />
-    <meta property="og:title" content="PyxeeBot" />
-    <meta property="og:description" content="A self-hosted Discord music bot with a custom search scoring engine and Last.fm curation." />
-    <meta property="og:image" content="https://pylxyr.github.io/PyxeeBot-Page/assets/logo.png" />
-    <meta property="og:url" content="https://pylxyr.github.io/PyxeeBot-Page/" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="PyxeeBot" />
-    <meta name="twitter:description" content="A self-hosted Discord music bot with a custom search scoring engine and Last.fm curation." />
-    <meta name="twitter:image" content="https://pylxyr.github.io/PyxeeBot-Page/assets/logo.png" />
-    <link rel="icon" href="/PyxeeBot-Page/assets/logo.png" type="image/png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital@0;1&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PyxeeBot — a self-hosted Discord music bot, in Rust</title>
+<meta name="description" content="A self-hosted Discord music bot rewritten in Rust — serenity, poise, songbird — tuned to run well on a single-vCPU box. MIT licensed.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><rect width=%2224%22 height=%2224%22 rx=%225%22 fill=%22%23101413%22/><path d=%22M5 15 L8 9 L11 17 L14 6 L17 13 L19 10%22 stroke=%22%23F0A868%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101413;
+    --bg-raised:#181D1E;
+    --bg-raised-2:#1F2628;
+    --line:#2A3133;
+    --signal:#F0A868;
+    --signal-dim:#8A6B4C;
+    --teal:#7FC4BC;
+    --teal-dim:#4D716C;
+    --ink:#EDEEEC;
+    --ink-dim:#97A1A0;
+    --ink-faint:#5C6664;
+    --mono:'IBM Plex Mono', ui-monospace, monospace;
+    --sans:'IBM Plex Sans', system-ui, sans-serif;
+    --max:1100px;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{ background:var(--signal); color:var(--bg); }
+
+  a{ color:inherit }
+  :focus-visible{ outline:2px solid var(--signal); outline-offset:3px; }
+
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+
+  /* ---------- nav ---------- */
+  header.site{
+    position:sticky; top:0; z-index:20;
+    background:rgba(16,20,19,.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:var(--max); margin:0 auto; }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:var(--mono); font-weight:600; letter-spacing:.02em; text-decoration:none; color:var(--ink); }
+  .brand svg{ display:block }
+  .navlinks{ display:flex; align-items:center; gap:28px; font-family:var(--mono); font-size:.85rem; }
+  .navlinks a{ text-decoration:none; color:var(--ink-dim); transition:color .15s; }
+  .navlinks a:hover{ color:var(--signal); }
+  .navlinks .gh{ color:var(--ink); border:1px solid var(--line); padding:7px 14px; border-radius:6px; transition:border-color .15s, color .15s; }
+  .navlinks .gh:hover{ border-color:var(--signal); color:var(--signal); }
+
+  /* ---------- hero ---------- */
+  .hero{ padding:88px 0 72px; border-bottom:1px solid var(--line); }
+  .hero-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:56px; align-items:center; }
+  @media (max-width:880px){ .hero-grid{ grid-template-columns:1fr; gap:44px; } }
+
+  .eyebrow{
+    font-family:var(--mono); font-size:.78rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--signal-dim); margin:0 0 18px;
+  }
+  .eyebrow::before{ content:'// '; color:var(--ink-faint); }
+
+  h1{
+    font-family:var(--mono); font-weight:700;
+    font-size:clamp(2.6rem, 7vw, 4.4rem);
+    line-height:.98; letter-spacing:-.01em;
+    margin:0 0 22px; color:var(--ink);
+  }
+  h1 .dot{ color:var(--signal); }
+
+  .lede{ font-size:1.14rem; color:var(--ink-dim); max-width:46ch; margin:0 0 34px; }
+  .lede strong{ color:var(--ink); font-weight:500; }
+
+  .cta-row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .btn{
+    font-family:var(--mono); font-size:.9rem; font-weight:500;
+    padding:13px 22px; border-radius:7px; text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .12s, border-color .15s, background .15s;
+  }
+  .btn-primary{ background:var(--signal); color:#1A1006; }
+  .btn-primary:hover{ transform:translateY(-1px); background:#F6C08F; }
+  .btn-ghost{ border:1px solid var(--line); color:var(--ink); }
+  .btn-ghost:hover{ border-color:var(--ink-dim); }
+
+  /* ---------- terminal ---------- */
+  .term{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .term-bar{
+    display:flex; align-items:center; gap:7px;
+    padding:11px 14px; border-bottom:1px solid var(--line);
+  }
+  .term-bar span{ width:9px; height:9px; border-radius:50%; background:var(--bg-raised-2); border:1px solid var(--line); }
+  .term-bar label{ margin-left:8px; font-family:var(--mono); font-size:.72rem; color:var(--ink-faint); }
+  .term-body{
+    font-family:var(--mono); font-size:.85rem; line-height:1.85;
+    padding:20px 18px; min-height:186px;
+    white-space:pre-wrap; word-break:break-word;
+  }
+  .term-body .prompt{ color:var(--signal); }
+  .term-body .arrow{ color:var(--ink-faint); }
+  .term-body .ok{ color:var(--teal); }
+  .term-body .amber{ color:var(--signal); }
+  .cursor{ display:inline-block; width:8px; height:1em; background:var(--signal); vertical-align:text-bottom; margin-left:2px; animation:blink 1s step-end infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+  @media (prefers-reduced-motion: reduce){ .cursor{ animation:none; } }
+
+  /* ---------- section shell ---------- */
+  section{ padding:84px 0; border-bottom:1px solid var(--line); }
+  .section-head{ max-width:56ch; margin-bottom:52px; }
+  h2{ font-family:var(--mono); font-size:clamp(1.5rem, 3vw, 2rem); margin:0 0 14px; letter-spacing:-.01em; }
+  .section-sub{ color:var(--ink-dim); margin:0; }
+
+  /* ---------- signal chain ---------- */
+  .chain{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; position:relative; }
+  @media (max-width:880px){ .chain{ grid-template-columns:1fr; gap:28px; } }
+  .chain-step{ position:relative; padding:0 22px 0 0; }
+  .chain-step:first-child{ padding-left:0; }
+  .chain-step:not(:last-child)::after{
+    content:''; position:absolute; top:13px; right:-2px; width:24px; height:1px; background:var(--line);
+  }
+  @media (max-width:880px){ .chain-step:not(:last-child)::after{ display:none; } }
+  .chain-num{ font-family:var(--mono); font-size:.78rem; color:var(--signal-dim); margin-bottom:14px; }
+  .chain-title{ font-family:var(--mono); font-weight:600; font-size:1.02rem; margin-bottom:10px; color:var(--ink); }
+  .chain-desc{ color:var(--ink-dim); font-size:.92rem; margin:0; }
+  .chain-desc code{ font-family:var(--mono); font-size:.85em; color:var(--signal); background:none; }
+
+  /* ---------- features ---------- */
+  .grid-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  @media (max-width:880px){ .grid-cards{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .grid-cards{ grid-template-columns:1fr; } }
+  .card{ background:var(--bg-raised); padding:28px 24px; }
+  .card h3{ font-family:var(--mono); font-size:.95rem; margin:0 0 12px; color:var(--ink); font-weight:600; }
+  .card ul{ list-style:none; margin:0; padding:0; font-family:var(--mono); font-size:.82rem; color:var(--ink-dim); }
+  .card li{ padding:3px 0; }
+  .card li::before{ content:'!'; color:var(--signal-dim); margin-right:6px; }
+
+  /* ---------- engineered ---------- */
+  .facts{ display:grid; grid-template-columns:1fr 1fr; gap:2px 40px; }
+  @media (max-width:700px){ .facts{ grid-template-columns:1fr; } }
+  .fact{ display:flex; gap:16px; padding:20px 0; border-top:1px solid var(--line); }
+  .fact:nth-child(1), .fact:nth-child(2){ border-top:none; }
+  .fact-mark{ font-family:var(--mono); color:var(--signal); flex-shrink:0; }
+  .fact:nth-child(2n) .fact-mark{ color:var(--teal); }
+  .fact p{ margin:0; color:var(--ink-dim); font-size:.94rem; }
+  .fact strong{ color:var(--ink); font-weight:500; }
+
+  /* ---------- host ---------- */
+  .host{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:40px; }
+  @media (max-width:700px){ .host{ grid-template-columns:1fr; } }
+  .stack-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:22px; }
+  .pill{ font-family:var(--mono); font-size:.76rem; color:var(--ink-dim); border:1px solid var(--line); border-radius:100px; padding:5px 12px; }
+
+  /* ---------- footer ---------- */
+  footer{ padding:40px 0; }
+  .foot-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; font-family:var(--mono); font-size:.8rem; color:var(--ink-faint); }
+  .foot-row a{ color:var(--ink-faint); text-decoration:none; }
+  .foot-row a:hover{ color:var(--signal); }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <nav>
+    <a class="brand" href="#top">
+      <svg width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#181D1E" stroke="#2A3133"/><path d="M5 15 L8 9 L11 17 L14 6 L17 13 L19 10" stroke="#F0A868" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      PyxeeBot
+    </a>
+    <div class="navlinks">
+      <a href="#chain">How it works</a>
+      <a href="#commands">Commands</a>
+      <a class="gh" href="https://github.com/pylxyr/PyxeeBot-Rust">GitHub ↗</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero" style="border-top:none; padding-top:88px;">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">self-hosted · discord · rust</p>
+        <h1>PyxeeBot<span class="dot">.</span></h1>
+        <p class="lede">A Discord music bot rewritten from the ground up in Rust — <strong>serenity</strong>, <strong>poise</strong>, <strong>songbird</strong> — and tuned, line by line, to run well on hardware that has no business running it well: a single shared vCPU.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/pylxyr/PyxeeBot-Rust">View source ↗</a>
+          <a class="btn btn-ghost" href="#chain">See how it plays a song</a>
+        </div>
+      </div>
+      <div class="term" aria-hidden="true">
+        <div class="term-bar"><span></span><span></span><span></span><label>guild session</label></div>
+        <div class="term-body" id="termBody"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="chain">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>The signal chain</h2>
+        <p class="section-sub">What actually happens between a <code style="font-family:var(--mono); color:var(--signal);">!play</code> and the first sample of audio. Each stage runs, in this order, every time.</p>
+      </div>
+      <div class="chain">
+        <div class="chain-step">
+          <div class="chain-num">01 / search</div>
+          <div class="chain-title">Flat-playlist query</div>
+          <p class="chain-desc">A lightweight <code>yt-dlp</code> search, no format resolution yet. Repeat queries hit a shared results cache instead of running twice.</p>
+        </div>
+        <div class="chain-step">
+          <div class="chain-num">02 / rank</div>
+          <div class="chain-title">Score every candidate</div>
+          <p class="chain-desc">Title and uploader overlap, fuzzy matching, discouraged-token penalties, JP-original detection — up to 10 candidates, ranked in microseconds.</p>
+        </div>
+        <div class="chain-step">
+          <div class="chain-num">03 / resolve</div>
+          <div class="chain-title">Extract + connect, together</div>
+          <p class="chain-desc">The winning track's stream is resolved while the bot joins your voice channel — concurrently, not back to back.</p>
+        </div>
+        <div class="chain-step">
+          <div class="chain-num">04 / play</div>
+          <div class="chain-title">Decode in-process</div>
+          <p class="chain-desc">Symphonia decodes the stream directly. No <code>ffmpeg</code> anywhere on the box.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="commands">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Commands</h2>
+        <p class="section-sub">Everything a listening session needs, nothing it doesn't.</p>
+      </div>
+      <div class="grid-cards">
+        <div class="card">
+          <h3>Playback</h3>
+          <ul><li>play</li><li>playnext</li><li>skip / stop</li><li>pause / resume</li><li>loop</li><li>nowplaying</li></ul>
+        </div>
+        <div class="card">
+          <h3>Queue</h3>
+          <ul><li>queue</li><li>shuffle / move</li><li>remove</li><li>history</li><li>toptracks</li></ul>
+        </div>
+        <div class="card">
+          <h3>Search</h3>
+          <ul><li>search</li><li>why</li></ul>
+        </div>
+        <div class="card">
+          <h3>Playlists</h3>
+          <ul><li>playlist save</li><li>playlist load</li><li>playlist show</li></ul>
+        </div>
+        <div class="card">
+          <h3>Curation</h3>
+          <ul><li>vibe</li><li>autoplay</li></ul>
+        </div>
+        <div class="card">
+          <h3>Admin</h3>
+          <ul><li>stay</li><li>setdj</li><li>setprefix</li><li>stats</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Engineered for one vCPU</h2>
+        <p class="section-sub">Oracle Cloud's free tier gives you a fraction of a core. Most of this bot's design decisions trace back to that one constraint.</p>
+      </div>
+      <div class="facts">
+        <div class="fact"><span class="fact-mark">▲</span><p><strong>Two separate concurrency limits</strong> — heavy per-video extraction is capped tight to avoid CPU contention; lighter search listings get their own, more generous budget.</p></div>
+        <div class="fact"><span class="fact-mark">▲</span><p><strong>Background prefetch never blocks an urgent request</strong> — if you hit skip while the next track is quietly pre-resolving, your skip always wins the CPU.</p></div>
+        <div class="fact"><span class="fact-mark">▲</span><p><strong>No ffmpeg dependency</strong> — audio is decoded in-process via Symphonia, one less subprocess spawned per track.</p></div>
+        <div class="fact"><span class="fact-mark">▲</span><p><strong>Everything worth caching is cached</strong> — resolved stream URLs and raw search results both, TTL-bound and shared across every command that could reuse them.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="border-bottom:none;">
+    <div class="wrap host">
+      <div>
+        <h2 style="margin-bottom:10px;">Self-host it</h2>
+        <p class="section-sub">MIT licensed. Deploys itself — push to <code style="font-family:var(--mono); color:var(--signal);">main</code>, GitHub Actions tests, builds, and restarts the service, with automatic rollback if it doesn't come back up clean.</p>
+        <div class="stack-row">
+          <span class="pill">serenity</span>
+          <span class="pill">poise</span>
+          <span class="pill">songbird</span>
+          <span class="pill">tokio</span>
+          <span class="pill">sqlx</span>
+          <span class="pill">symphonia</span>
+        </div>
+      </div>
+      <a class="btn btn-primary" href="https://github.com/pylxyr/PyxeeBot-Rust">View on GitHub ↗</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-row">
+    <span>MIT licensed · built by <a href="https://github.com/pylxyr">pylxyr</a></span>
+    <a href="#top">back to top ↑</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var lines = [
+    {t:'!play zutomayo milabo', cls:'prompt', prefix:'$ '},
+    {t:'searching...', cls:'', prefix:'  '},
+    {t:'found: ZUTOMAYO - MILABO', cls:'ok', prefix:'\u2192 '},
+    {t:'connecting + resolving (concurrently)', cls:'', prefix:'\u2192 '},
+    {t:'playback started', cls:'amber', prefix:'\u2192 '}
+  ];
+  var el = document.getElementById('termBody');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function renderStatic(){
+    el.innerHTML = lines.map(function(l){
+      return '<div><span class="arrow">'+l.prefix+'</span><span class="'+l.cls+'">'+l.t+'</span></div>';
+    }).join('');
+  }
+
+  if (reduced) { renderStatic(); return; }
+
+  var li = 0, ci = 0;
+  function typeNext(){
+    if (li >= lines.length){
+      var cur = document.createElement('span');
+      cur.className = 'cursor';
+      el.appendChild(cur);
+      return;
+    }
+    var line = lines[li];
+    if (ci === 0){
+      var row = document.createElement('div');
+      row.innerHTML = '<span class="arrow">'+line.prefix+'</span><span class="'+line.cls+'"></span>';
+      row.id = 'row'+li;
+      el.appendChild(row);
+    }
+    var target = document.getElementById('row'+li).querySelector('span:last-child');
+    ci++;
+    target.textContent = line.t.slice(0, ci);
+    if (ci < line.t.length){
+      setTimeout(typeNext, 18 + Math.random()*22);
+    } else {
+      li++; ci = 0;
+      setTimeout(typeNext, 260);
+    }
+  }
+  typeNext();
+})();
+</script>
+
+</body>
 </html>
