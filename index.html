@@ -252,11 +252,11 @@
       <div class="grid-cards">
         <div class="card">
           <h3>Playback</h3>
-          <ul><li>play</li><li>playnext</li><li>skip / stop</li><li>pause / resume</li><li>loop</li><li>nowplaying</li></ul>
+          <ul><li>play / playnext</li><li>join / leave</li><li>skip / stop</li><li>pause / resume</li><li>previous</li><li>loop</li><li>nowplaying</li></ul>
         </div>
         <div class="card">
           <h3>Queue</h3>
-          <ul><li>queue</li><li>shuffle / move</li><li>remove</li><li>history</li><li>toptracks</li></ul>
+          <ul><li>queue / clear</li><li>shuffle / move</li><li>remove</li><li>history</li><li>toptracks</li><li>toprequestors</li></ul>
         </div>
         <div class="card">
           <h3>Search</h3>
@@ -264,7 +264,7 @@
         </div>
         <div class="card">
           <h3>Playlists</h3>
-          <ul><li>playlist save</li><li>playlist load</li><li>playlist show</li></ul>
+          <ul><li>playlist save</li><li>playlist load</li><li>playlist list</li><li>playlist show</li><li>playlist delete</li></ul>
         </div>
         <div class="card">
           <h3>Curation</h3>
@@ -272,7 +272,7 @@
         </div>
         <div class="card">
           <h3>Admin</h3>
-          <ul><li>stay</li><li>setdj</li><li>setprefix</li><li>stats</li></ul>
+          <ul><li>stay</li><li>setdj / cleardj / dj</li><li>setprefix</li><li>stats</li></ul>
         </div>
       </div>
     </div>
@@ -285,8 +285,8 @@
         <p class="section-sub">Oracle Cloud's free tier gives you a fraction of a core. Most of this bot's design decisions trace back to that one constraint.</p>
       </div>
       <div class="facts">
-        <div class="fact"><span class="fact-mark">▲</span><p><strong>Two separate concurrency limits</strong> — heavy per-video extraction is capped tight to avoid CPU contention; lighter search listings get their own, more generous budget.</p></div>
-        <div class="fact"><span class="fact-mark">▲</span><p><strong>Background prefetch never blocks an urgent request</strong> — if you hit skip while the next track is quietly pre-resolving, your skip always wins the CPU.</p></div>
+        <div class="fact"><span class="fact-mark">▲</span><p><strong>Prefetch resolves one track at a time, on purpose</strong> — running several extractions in parallel on one core slows each of them down instead of speeding the batch up, so the background prefetcher works the queue sequentially instead.</p></div>
+        <div class="fact"><span class="fact-mark">▲</span><p><strong>The player never blocks on a resolve</strong> — skip, pause, and every queue edit are handled immediately by an actor model that stays responsive mid-extraction; reordering the queue cancels a stale prefetch outright instead of waiting behind it.</p></div>
         <div class="fact"><span class="fact-mark">▲</span><p><strong>No ffmpeg dependency</strong> — audio is decoded in-process via Symphonia, one less subprocess spawned per track.</p></div>
         <div class="fact"><span class="fact-mark">▲</span><p><strong>Everything worth caching is cached</strong> — resolved stream URLs and raw search results both, TTL-bound and shared across every command that could reuse them.</p></div>
       </div>
