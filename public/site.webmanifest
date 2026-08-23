@@ -1,0 +1,15 @@
+{
+  "name": "PyxeeBot — Self-hosted Discord Music Bot",
+  "short_name": "PyxeeBot",
+  "description": "A self-hosted Discord music bot with ranked search, Last.fm-powered curation, and a persistent queue.",
+  "start_url": "/PyxeeBot-Page/",
+  "scope": "/PyxeeBot-Page/",
+  "display": "standalone",
+  "background_color": "#12100f",
+  "theme_color": "#12100f",
+  "icons": [
+    { "src": "/PyxeeBot-Page/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/PyxeeBot-Page/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/PyxeeBot-Page/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

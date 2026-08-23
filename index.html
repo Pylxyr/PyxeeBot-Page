@@ -1,1 +1,49 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>PyxeeBot — Make the next song feel inevitable.</title><meta name="description" content="A self-hosted Discord music bot with better search, Last.fm curation, and live controls."/><meta name="theme-color" content="#0e141a"/><link rel="icon" type="image/png" href="./assets/logo.png"/><link rel="apple-touch-icon" href="./assets/logo.png"/></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('pyxeebot-theme');
+          var theme = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PyxeeBot — A self-hosted Discord music bot that respects the queue</title>
+    <meta name="description" content="PyxeeBot is a self-hosted, open-source Discord music bot: ranked search, optional Last.fm-powered curation, DJ roles, and a queue that survives restarts. Free, MIT licensed, built for a 1-core VPS." />
+    <meta name="theme-color" content="#12100f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="PyxeeBot — A self-hosted Discord music bot that respects the queue" />
+    <meta property="og:description" content="Ranked search, optional Last.fm curation, DJ roles, and a queue that survives restarts. Free, open source, MIT licensed." />
+    <meta property="og:image" content="https://pylxyr.github.io/PyxeeBot-Page/assets/logo.png" />
+    <meta property="og:url" content="https://pylxyr.github.io/PyxeeBot-Page/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="PyxeeBot — A self-hosted Discord music bot" />
+    <meta name="twitter:description" content="Ranked search, optional Last.fm curation, DJ roles, and a queue that survives restarts." />
+    <meta name="twitter:image" content="https://pylxyr.github.io/PyxeeBot-Page/assets/logo.png" />
+
+    <link rel="icon" href="./favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
