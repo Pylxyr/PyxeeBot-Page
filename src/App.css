@@ -23,6 +23,7 @@ html {
   --shadow: 0 25px 70px #0008;
   --shadow-soft: 0 8px 24px #0006;
   --pulse: #ff6f5d;
+  --nav-bg: #12100fcc;
 }
 
 [data-theme='light'] {
@@ -42,6 +43,7 @@ html {
   --shadow: 0 25px 70px #00000014;
   --shadow-soft: 0 8px 24px #00000012;
   --pulse: #d84a37;
+  --nav-bg: #f7f4eecc;
 }
 
 * {
@@ -73,13 +75,129 @@ code {
   width: min(1160px, calc(100% - 64px));
   margin: auto;
 }
+#top,
+#why,
+#commands {
+  scroll-margin-top: 87px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Focus states (keyboard navigation)                                 */
+/* ------------------------------------------------------------------ */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.theme-toggle:focus-visible,
+.controls .play:focus-visible {
+  outline-offset: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Scroll progress                                                     */
+/* ------------------------------------------------------------------ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  z-index: 70;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reveal on scroll                                                    */
+/* ------------------------------------------------------------------ */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s cubic-bezier(0.16, 0.8, 0.24, 1), transform 0.7s cubic-bezier(0.16, 0.8, 0.24, 1);
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal.delay-1.in-view {
+  transition-delay: 0.08s;
+}
+.reveal.delay-2.in-view {
+  transition-delay: 0.16s;
+}
+.reveal.delay-3.in-view {
+  transition-delay: 0.24s;
+}
+.reveal.delay-4.in-view {
+  transition-delay: 0.32s;
+}
+.features article.reveal:nth-child(1).in-view {
+  transition-delay: 0s;
+}
+.features article.reveal:nth-child(2).in-view {
+  transition-delay: 0.1s;
+}
+.features article.reveal:nth-child(3).in-view {
+  transition-delay: 0.2s;
+}
+.extras .extra.reveal:nth-child(1).in-view {
+  transition-delay: 0s;
+}
+.extras .extra.reveal:nth-child(2).in-view {
+  transition-delay: 0.07s;
+}
+.extras .extra.reveal:nth-child(3).in-view {
+  transition-delay: 0.14s;
+}
+.extras .extra.reveal:nth-child(4).in-view {
+  transition-delay: 0.21s;
+}
+.commands a.reveal:nth-child(1).in-view {
+  transition-delay: 0s;
+}
+.commands a.reveal:nth-child(2).in-view {
+  transition-delay: 0.05s;
+}
+.commands a.reveal:nth-child(3).in-view {
+  transition-delay: 0.1s;
+}
+.commands a.reveal:nth-child(4).in-view {
+  transition-delay: 0.15s;
+}
+.commands a.reveal:nth-child(5).in-view {
+  transition-delay: 0.2s;
+}
+.commands a.reveal:nth-child(6).in-view {
+  transition-delay: 0.25s;
+}
+.commands a.reveal:nth-child(7).in-view {
+  transition-delay: 0.3s;
+}
+.commands a.reveal:nth-child(8).in-view {
+  transition-delay: 0.35s;
+}
+.commands a.reveal:nth-child(9).in-view {
+  transition-delay: 0.4s;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Nav                                                                 */
 /* ------------------------------------------------------------------ */
 .nav {
-  height: 86px;
+  position: sticky;
+  top: 0;
+  z-index: 60;
   border-bottom: 1px solid var(--border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.nav-inner {
+  height: 86px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -116,6 +234,9 @@ code {
 .footer a:hover {
   color: var(--accent);
 }
+.links a.active {
+  color: var(--accent);
+}
 .nav-right {
   display: flex;
   align-items: center;
@@ -146,6 +267,42 @@ code {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Mobile menu (hamburger + dropdown)                                 */
+/* ------------------------------------------------------------------ */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 34px;
+  height: 34px;
+  background: none;
+  border: 0;
+  padding: 0;
+  flex: none;
+}
+.menu-toggle span {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--fg);
+  transition: transform 0.3s ease, opacity 0.2s ease;
+}
+.menu-toggle.open span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+.menu-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+.menu-toggle.open span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+.nav-mobile {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Hero                                                                 */
 /* ------------------------------------------------------------------ */
 .hero {
@@ -155,6 +312,7 @@ code {
   gap: 80px;
   align-items: center;
   padding: 70px 0 90px;
+  perspective: 1400px;
 }
 .kicker {
   font: 10px 'DM Mono';
@@ -238,6 +396,9 @@ code {
 /* ------------------------------------------------------------------ */
 .player-wrap {
   position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease-out;
+  will-change: transform;
 }
 .player {
   background: var(--bg-panel);
@@ -824,6 +985,42 @@ code {
   }
   .links {
     display: none;
+  }
+  .nav-cta {
+    display: none;
+  }
+  .menu-toggle {
+    display: flex;
+  }
+  .nav-mobile {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: max-height 0.35s ease, border-color 0.35s ease;
+  }
+  .nav-mobile.open {
+    max-height: 260px;
+    border-bottom-color: var(--border);
+  }
+  .nav-mobile a {
+    display: block;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+    font: 12px 'DM Mono';
+    color: var(--fg-dim);
+  }
+  .nav-mobile a:first-child {
+    border-top: 0;
+  }
+  .nav-mobile a:hover {
+    color: var(--accent);
+  }
+  .nav-mobile-cta {
+    color: var(--accent) !important;
   }
   .hero {
     grid-template-columns: 1fr;

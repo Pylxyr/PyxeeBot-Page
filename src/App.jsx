@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 const BASE = import.meta.env.BASE_URL
@@ -22,14 +22,14 @@ const features = [
   [
     '⌕',
     'SEARCH',
-    'The right track, first try.',
-    '!play resolves a direct link immediately. A plain-text query opens a ranked, paged picker from !search, so a vague request doesn\u2019t just grab YouTube\u2019s top hit.',
+    'A fast default, an easy fix.',
+    '!play takes a URL or a search query and queues yt-dlp\u2019s top match right away \u2014 no picker in the way. Got the wrong one? !search lists up to 10 candidates so you can pick it yourself.',
   ],
   [
     '✦',
     'VIBE',
     'Curate the room, not just the queue.',
-    '!vibe asks Last.fm what sounds like your seed track, builds a review queue you can trim before anything plays, and can auto-refill the queue when it runs low. Optional \u2014 bring your own free Last.fm API key.',
+    '!vibe asks Last.fm what sounds like your seed track and builds a review queue you can trim before anything plays. It\u2019ll prompt a refill once things run low, or you can hand that off to !autoplay entirely. Optional \u2014 bring your own free Last.fm API key.',
   ],
   [
     '◉',
@@ -40,15 +40,15 @@ const features = [
 ]
 
 const extras = [
-  ['DJ roles & vote-skip', '!setdj hands sensitive controls to a role; everyone else votes to skip.'],
+  ['DJ roles & vote-skip', '!setdj hands sensitive controls to a role \u2014 server managers keep them too; everyone else votes to skip.'],
   ['Slash commands included', 'Every command is registered as a hybrid command \u2014 type ! or use /.'],
   ['Per-server prefix', '!setprefix changes it; ! still works as a permanent fallback.'],
   ['Auto-disconnect', 'Leaves voice when idle or when the channel empties out, on your timers.'],
 ]
 
 const commands = [
-  ['!play', 'Queue a URL, or open a picker for a text search'],
-  ['!search', 'Search explicitly and choose from ranked candidates'],
+  ['!play', 'Queue a URL, playlist, or search query'],
+  ['!search', 'Browse results and pick before it queues'],
   ['!vibe', 'Build a Last.fm-curated queue from a seed track'],
   ['!nowplaying', 'Live panel: prev, pause/resume, skip, loop'],
   ['!queue', 'See what\u2019s coming up next'],
@@ -85,6 +85,91 @@ function useTheme() {
   return [theme, toggle]
 }
 
+/* ---------------------------------------------------------------------- */
+/*  Scroll-driven polish: reveal-on-scroll, active nav section, a thin    */
+/*  progress bar, and a restrained tilt on the hero player. All of it     */
+/*  backs off automatically under prefers-reduced-motion.                 */
+/* ---------------------------------------------------------------------- */
+function useScrollReveal() {
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll('.reveal'))
+    if (!els.length) return undefined
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view')
+            io.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+    )
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+}
+
+function useActiveSection(ids) {
+  const [active, setActive] = useState(ids[0])
+  useEffect(() => {
+    const sections = ids.map((id) => document.getElementById(id)).filter(Boolean)
+    if (!sections.length) return undefined
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActive(entry.target.id)
+        })
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
+    )
+    sections.forEach((s) => io.observe(s))
+    return () => io.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return active
+}
+
+function useScrollProgress() {
+  const [progress, setProgress] = useState(0)
+  useEffect(() => {
+    const onScroll = () => {
+      const h = document.documentElement
+      const max = h.scrollHeight - h.clientHeight
+      setProgress(max > 0 ? h.scrollTop / max : 0)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  return progress
+}
+
+function useTilt(ref, maxDeg = 5) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return undefined
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return undefined
+
+    const handleMove = (e) => {
+      const rect = el.getBoundingClientRect()
+      const px = (e.clientX - rect.left) / rect.width - 0.5
+      const py = (e.clientY - rect.top) / rect.height - 0.5
+      el.style.transform = `rotateX(${(-py * maxDeg).toFixed(2)}deg) rotateY(${(px * maxDeg).toFixed(2)}deg)`
+    }
+    const handleLeave = () => {
+      el.style.transform = ''
+    }
+    el.addEventListener('mousemove', handleMove)
+    el.addEventListener('mouseleave', handleLeave)
+    return () => {
+      el.removeEventListener('mousemove', handleMove)
+      el.removeEventListener('mouseleave', handleLeave)
+    }
+  }, [ref, maxDeg])
+}
+
 function ThemeToggle({ theme, onToggle }) {
   return (
     <button
@@ -116,10 +201,26 @@ export default function App() {
   const [active, setActive] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const [copied, setCopied] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const playerRef = useRef(null)
+
+  useScrollReveal()
+  useTilt(playerRef)
+  const activeSection = useActiveSection(['top', 'why', 'commands'])
+  const progress = useScrollProgress()
 
   useEffect(() => {
     setElapsed(0)
   }, [active])
+
+  useEffect(() => {
+    if (!menuOpen) return undefined
+    const onKey = (e) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuOpen])
 
   useEffect(() => {
     if (!playing) return
@@ -146,43 +247,83 @@ export default function App() {
 
   return (
     <main>
-      <nav className="nav shell">
-        <a className="brand" href="#top">
-          <img className="brand-logo" src={LOGO} alt="PyxeeBot" width="29" height="29" />
-          <span>
-            Pyxee<span>Bot</span>
-          </span>
-        </a>
-        <div className="links">
-          <a href="#why">Why Pyxee</a>
-          <a href="#commands">Commands</a>
-          <a href={REPO} target="_blank" rel="noopener noreferrer">
-            GitHub ↗
+      <div className="scroll-progress" style={{ transform: `scaleX(${progress})` }} />
+
+      <nav className="nav">
+        <div className="nav-inner shell">
+          <a className="brand" href="#top">
+            <img className="brand-logo" src={LOGO} alt="PyxeeBot" width="29" height="29" />
+            <span>
+              Pyxee<span>Bot</span>
+            </span>
           </a>
-        </div>
-        <div className="nav-right">
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          <a className="nav-cta" href={`${REPO}#local-setup`} target="_blank" rel="noopener noreferrer">
-            Get started ↗
-          </a>
+          <div className="links">
+            <a href="#why" className={activeSection === 'why' ? 'active' : ''}>
+              Why Pyxee
+            </a>
+            <a href="#commands" className={activeSection === 'commands' ? 'active' : ''}>
+              Commands
+            </a>
+            <a href={REPO} target="_blank" rel="noopener noreferrer">
+              GitHub ↗
+            </a>
+          </div>
+          <div className="nav-right">
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            <a className="nav-cta" href={`${REPO}#local-setup`} target="_blank" rel="noopener noreferrer">
+              Get started ↗
+            </a>
+            <button
+              className={`menu-toggle${menuOpen ? ' open' : ''}`}
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
         </div>
       </nav>
 
+      <div id="mobile-menu" className={`nav-mobile${menuOpen ? ' open' : ''}`}>
+        <a href="#why" onClick={() => setMenuOpen(false)}>
+          Why Pyxee
+        </a>
+        <a href="#commands" onClick={() => setMenuOpen(false)}>
+          Commands
+        </a>
+        <a href={REPO} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
+          GitHub ↗
+        </a>
+        <a
+          className="nav-mobile-cta"
+          href={`${REPO}#local-setup`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setMenuOpen(false)}
+        >
+          Get started ↗
+        </a>
+      </div>
+
       <section id="top" className="hero shell">
         <div>
-          <div className="kicker">
+          <div className="kicker reveal">
             <i /> SELF-HOSTED · OPEN SOURCE · DISCORD MUSIC
           </div>
-          <h1>
+          <h1 className="reveal delay-1">
             A music bot that
             <br />
             <em>respects the queue.</em>
           </h1>
-          <p className="lede">
+          <p className="lede reveal delay-2">
             PyxeeBot is a self-hosted Discord bot for communities that want the right track on the first
             try, a queue that survives a restart, and a room that doesn&rsquo;t need babysitting.
           </p>
-          <div className="actions">
+          <div className="actions reveal delay-3">
             <a className="button" href={`${REPO}#local-setup`} target="_blank" rel="noopener noreferrer">
               Install PyxeeBot ↗
             </a>
@@ -190,7 +331,7 @@ export default function App() {
               See how it works ↓
             </a>
           </div>
-          <div className="meta">
+          <div className="meta reveal delay-4">
             <span>
               <b>MIT</b> LICENSED
             </span>
@@ -203,7 +344,7 @@ export default function App() {
           </div>
         </div>
 
-        <div className="player-wrap">
+        <div className="player-wrap" ref={playerRef}>
           <div className="badge one">
             <span>SQLite queue</span>survives a restart
           </div>
@@ -282,20 +423,20 @@ export default function App() {
       </div>
 
       <section id="why" className="section shell">
-        <div className="kicker">01 / THE DIFFERENCE</div>
-        <h2>
+        <div className="kicker reveal">01 / THE DIFFERENCE</div>
+        <h2 className="reveal delay-1">
           Better discovery.
           <br />
           <em>Fewer corrections.</em>
         </h2>
-        <p className="intro">
+        <p className="intro reveal delay-2">
           Most music bots make you work for the moment. PyxeeBot is built around what happens after
           someone types a song: a good result, a queue you can actually shape, and controls that make
           sense in the middle of a conversation.
         </p>
         <div className="features">
           {features.map((f, i) => (
-            <article key={f[1]}>
+            <article key={f[1]} className="reveal">
               <strong>{f[0]}</strong>
               <small>
                 0{i + 1} / {f[1]}
@@ -308,7 +449,7 @@ export default function App() {
         </div>
         <div className="extras">
           {extras.map((e) => (
-            <div key={e[0]} className="extra">
+            <div key={e[0]} className="extra reveal">
               <b>{e[0]}</b>
               <p>{e[1]}</p>
             </div>
@@ -318,7 +459,7 @@ export default function App() {
 
       <section className="demo">
         <div className="shell demo-grid">
-          <div>
+          <div className="reveal">
             <div className="kicker">02 / IN THE CHANNEL</div>
             <h2>
               Simple enough
@@ -335,7 +476,7 @@ export default function App() {
             </a>
           </div>
 
-          <div className="terminal">
+          <div className="terminal reveal delay-1">
             <header>
               ●　discord / # music <b>● LIVE</b>
             </header>
@@ -383,15 +524,15 @@ export default function App() {
       </section>
 
       <section id="commands" className="section shell">
-        <div className="kicker">03 / QUICK REFERENCE</div>
-        <h2>
+        <div className="kicker reveal">03 / QUICK REFERENCE</div>
+        <h2 className="reveal delay-1">
           A command for
           <br />
           <em>every mood.</em>
         </h2>
         <div className="commands">
           {commands.map((c) => (
-            <a href={`${REPO}#commands`} target="_blank" rel="noopener noreferrer" key={c[0]}>
+            <a href={`${REPO}#commands`} target="_blank" rel="noopener noreferrer" key={c[0]} className="reveal">
               <code>{c[0]}</code>
               <span>{c[1]}</span>
               <b>↗</b>
@@ -409,7 +550,7 @@ export default function App() {
 
       <section className="infra">
         <div className="shell infra-grid">
-          <div>
+          <div className="reveal">
             <div className="kicker">04 / BUILT FOR THE REAL WORLD</div>
             <h2>
               Focused systems.
@@ -417,7 +558,7 @@ export default function App() {
               <em>Low overhead.</em>
             </h2>
           </div>
-          <div>
+          <div className="reveal delay-1">
             <p>
               Designed for a single-core shared VPS: one yt-dlp extraction slot by default, 64 kbps Opus
               encoding, and a SQLite snapshot that survives restarts. Idle and empty-channel timeouts
@@ -442,7 +583,7 @@ export default function App() {
         </div>
       </section>
 
-      <section className="closing shell">
+      <section className="closing shell reveal">
         <div className="mark">
           <img src={LOGO} alt="PyxeeBot" />
         </div>
