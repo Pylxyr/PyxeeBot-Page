@@ -1123,17 +1123,6 @@ button:focus-visible {
     box-shadow: 0 31px 78px #00000022;
   }
 }
-@keyframes signal-pulse {
-  0%,
-  100% {
-    opacity: 0.45;
-    transform: scaleX(0.7);
-  }
-  50% {
-    opacity: 1;
-    transform: scaleX(1);
-  }
-}
 @keyframes equalizer-rise {
   0%,
   100% {
@@ -1180,10 +1169,6 @@ button:focus-visible {
   animation: art-scan 5.5s ease-in-out infinite;
   z-index: 2;
 }
-.bar i {
-  animation: signal-pulse 2.5s ease-in-out infinite;
-  transform-origin: left;
-}
 .eq i {
   animation: equalizer-rise 1s ease-in-out infinite;
   transform-origin: bottom;
@@ -1205,6 +1190,9 @@ button:focus-visible {
 }
 .queue:nth-of-type(3) {
   animation-delay: 0.24s;
+}
+.queue:nth-of-type(4) {
+  animation-delay: 0.36s;
 }
 
 @media (prefers-reduced-motion: reduce) {

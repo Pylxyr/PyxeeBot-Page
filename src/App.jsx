@@ -6,16 +6,18 @@ const LOGO = `${BASE}assets/logo.png`
 const REPO = 'https://github.com/Pylxyr/PyxeeBot'
 
 /* ---------------------------------------------------------------------- */
-/*  Illustrative "now playing" content for the hero mockup. Fictional     */
-/*  track pairing, real-style formatting — the bot streams anything       */
-/*  resolvable on YouTube, this is just a demo of the panel.              */
+/*  "Now playing" content for the hero mockup — real tracks, so the panel */
+/*  reflects something a room might actually be listening to. Durations   */
+/*  match each track's official release length.                          */
 /* ---------------------------------------------------------------------- */
 const tracks = [
-  ['Windless Blue', 'Kanade Amane', '4:02'],
-  ['Paper Moon Radio', 'Hoshino Ellie', '3:47'],
-  ['Late Static', 'Tsukikage', '4:15'],
+  ['Saturn', 'ZUTOMAYO', '4:10'],
+  ['Plover', 'Yorushika', '4:12'],
+  ['Racing Into the Night', 'YOASOBI', '4:21'],
+  ['No Title', 'Reol', '4:03'],
+  ['Marigold', 'Aimyon', '5:08'],
 ]
-const durations = [242, 227, 255]
+const durations = [250, 252, 261, 243, 308]
 const clock = (seconds) => Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0')
 
 const features = [
@@ -59,11 +61,10 @@ const commands = [
 ]
 
 const demoTracks = [
-  ['Daoko', 'Shibuya Reprise'],
-  ['Tricot', 'Aster Field'],
-  ['Kikuo', 'Paper Lantern'],
-  ['Chilldspot', 'Rooftop, 2am'],
-  ['Yunomi', 'Static Bloom'],
+  ['ZUTOMAYO', 'Saturn'],
+  ['Yorushika', 'Plover'],
+  ['Reol', 'No Title'],
+  ['Aimyon', 'Marigold'],
 ]
 
 function useTheme() {
@@ -487,7 +488,7 @@ export default function App() {
                   mika <small>today at 23:41</small>
                 </b>
                 <br />
-                !vibe daoko — shibuya reprise
+                !vibe yoasobi — racing into the night
               </span>
             </div>
             <div className="msg">
@@ -497,7 +498,7 @@ export default function App() {
                   PyxeeBot <small>APP</small>
                 </b>
                 <div className="embed">
-                  <small>CURATED PLAYLIST · DAOKO — SHIBUYA REPRISE</small>
+                  <small>CURATED PLAYLIST · YOASOBI — RACING INTO THE NIGHT</small>
                   <h4>Here&rsquo;s a queue built from that seed.</h4>
                   <p>
                     {demoTracks.map((t, i) => (
@@ -507,7 +508,7 @@ export default function App() {
                       </span>
                     ))}
                   </p>
-                  <small className="embed-footer">5/25 tracks selected · use the dropdown to remove tracks</small>
+                  <small className="embed-footer">4/25 tracks selected · use the dropdown to remove tracks</small>
                   <div className="embed-buttons">
                     <button className="b-success">Queue All</button>
                     <button className="b-primary">Save Playlist</button>
