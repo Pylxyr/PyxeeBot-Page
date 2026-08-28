@@ -43,7 +43,7 @@ const features = [
 
 const extras = [
   ['DJ roles & vote-skip', '!setdj hands sensitive controls to a role \u2014 server managers keep them too; everyone else votes to skip.'],
-  ['Slash commands included', 'Every command is registered as a hybrid command \u2014 type ! or use /.'],
+  ['Slash commands included', 'Nearly every command is registered as a hybrid command \u2014 type ! or use /.'],
   ['Per-server prefix', '!setprefix changes it; ! still works as a permanent fallback.'],
   ['Auto-disconnect', 'Leaves voice when idle or when the channel empties out, on your timers.'],
 ]
@@ -219,8 +219,15 @@ export default function App() {
     const onKey = (e) => {
       if (e.key === 'Escape') setMenuOpen(false)
     }
+    const onPointerDown = (e) => {
+      if (!e.target.closest('.nav, #mobile-menu')) setMenuOpen(false)
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onPointerDown)
+    }
   }, [menuOpen])
 
   useEffect(() => {
