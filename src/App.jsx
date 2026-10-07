@@ -52,10 +52,21 @@ const PROJECTS = [
       ['!autoplay', 'Toggle similar-track refill'],
       ['!setdj', 'Assign a DJ role'],
     ],
+    quickstart: [
+      'git clone https://github.com/Pylxyr/PyxeeBot.git ~/musicbot',
+      'cd ~/musicbot',
+      'bash deploy/setup_oracle.sh   # or setup_gcp.sh / setup.sh',
+    ],
+    facts: [
+      ['Target host', '1 core, 1 GB RAM — Oracle E2.1.Micro, GCP e2-micro'],
+      ['Invite permissions', '3230720 — View, Send, Embed, History, Connect, Speak'],
+      ['Safety', 'Private/LAN URLs refused; titles can never ping @everyone or roles'],
+      ['systemd', 'MemoryMax=700M, no capabilities, read-only home'],
+    ],
     specs: [
       ['64 kbps', 'Opus default'],
-      ['128', 'Track URL cache'],
-      ['25', 'Playlist limit'],
+      ['128', 'Stream-URL cache entries'],
+      ['25', 'Tracks per playlist URL'],
       ['30 min', 'Stream URL TTL'],
     ],
   },
@@ -101,6 +112,18 @@ const PROJECTS = [
       ['!giveaway', 'Run a prize draw'],
       ['!predict', 'Start a Prediction'],
       ['!counter', 'Named counters'],
+    ],
+    quickstart: [
+      'git clone https://github.com/Pylxyr/pyxee-twitch-bot.git',
+      'cd pyxee-twitch-bot && bash ./deploy/setup.sh',
+      'python bot.py --check-config   # validates .env, never touches Twitch',
+    ],
+    facts: [
+      ['Required config', 'TWITCH_CLIENT_ID, _CLIENT_SECRET, _BOT_ID, _OWNER_ID'],
+      ['HTTP', '127.0.0.1:8098 by default — publish through Caddy'],
+      ['Health', '/healthz returns 503 when the database is down'],
+      ['Backups', 'community.db daily, newest 7 kept'],
+      ['Tests', '125 test functions across 22 files'],
     ],
     specs: [
       ['Local', 'No cloud'],
@@ -148,11 +171,22 @@ const PROJECTS = [
       ['!skip', 'Skip (mods or requester)'],
       ['!radio', 'Toggle auto-radio mode'],
     ],
+    quickstart: [
+      '# Windows: run "Twitch Radio Setup x.y.z.exe" from Releases',
+      'OBS Media Source   http://127.0.0.1:8098/stream.opus',
+      'OBS Browser Source http://127.0.0.1:8098/overlay',
+    ],
+    facts: [
+      ['Accounts', 'Two Twitch accounts: your channel + a bot account (mod it)'],
+      ['OAuth redirect', 'http://localhost:4343/oauth/callback'],
+      ['Lookups', '2 parallel, 45 s timeout, exit after 120 s idle'],
+      ['Network', 'Out to Twitch, YouTube, GitHub (update checks) only'],
+    ],
     specs: [
       ['127.0.0.1', 'Local only'],
       ['160 kbps', 'Opus default'],
       ['Gapless', 'Hand-over'],
-      ['Tray', 'True close'],
+      ['1.1.0', 'Desktop app'],
     ],
   },
   {
@@ -162,8 +196,8 @@ const PROJECTS = [
     status: 'In progress',
     blurb: 'Twitch Radio, rewritten for minimal footprint.',
     description:
-      'A ground-up Rust rewrite of Twitch-Radio. One native binary, in-process Opus encode, no Electron, no bundled Python, no ffmpeg processes. Target: the smallest possible song-request radio that still feels complete.',
-    stack: ['Rust 1.85+', 'tokio', 'rustls', 'libopus', 'yt-dlp'],
+      'A ground-up Rust rewrite of Twitch-Radio with one goal: minimal binary size and memory. One native binary, in-process Opus encode, no Electron, no bundled Python, no ffmpeg processes. Audio and lookups work today; the Twitch side is next.',
+    stack: ['Rust 1.85+', 'tokio', 'hyper', 'symphonia', 'rustls', 'libopus'],
     repo: 'https://github.com/Pylxyr/Pryxea',
     accent: '#3ecf8e',
     highlights: [
@@ -195,6 +229,25 @@ const PROJECTS = [
       ['!sq', 'Song queue (planned)'],
       ['!radio', 'Autoplay toggle (planned)'],
     ],
+    quickstart: [
+      'git clone https://github.com/Pylxyr/Pryxea.git && cd Pryxea',
+      'cargo build --release   # needs Rust 1.85+ and cmake',
+      'cargo run --release --example lookup -- "song name or YouTube URL"',
+    ],
+    facts: [
+      ['Formats', 'Opus (WebM/MP4) and AAC-LC; HE-AAC, surround, live and HLS refused'],
+      ['Peak RSS', '11 MB streaming, 5.4 MB with 20 WebSockets + 5 listeners'],
+      ['Security', 'Loopback only; Host header checked against DNS rebinding'],
+      ['Known diff', 'AAC keeps ~23 ms priming; Opus up to ~14 ms end padding'],
+    ],
+    roadmap: [
+      ['Config, stores, command parser, Ogg hub, HTTP/WS, overlay', 'done'],
+      ['Audio engine: decode, resample, Opus encode, gapless', 'done'],
+      ['HTTPS client, yt-dlp lookups, tool installer, radio mix', 'done'],
+      ['Twitch: OAuth, EventSub chat, five commands', 'next'],
+      ['Queue, player loop, persistence, /settings', 'todo'],
+      ['Tray icon, packaging, CI', 'todo'],
+    ],
     specs: [
       ['0.76 MB', 'Binary'],
       ['2.5 MB', 'Idle RSS'],
@@ -202,6 +255,12 @@ const PROJECTS = [
       ['Unlicense', 'Public domain'],
     ],
   },
+]
+
+const LINKS = [
+  ['Twitch Radio', 'Pryxea', 'Pryxea is a ground-up Rust rewrite of Twitch Radio. Same chat commands, same OBS endpoints, and an existing .env carries over.'],
+  ['Pyxee Twitch Bot', 'Twitch Radio', 'Both build on TwitchIO 3.3.2 and aiohttp, and each serves its own local web UI on port 8098 by default. Pick the moderation bot, the radio, or both.'],
+  ['PyxeeBot', 'Twitch Radio', 'Same playback core idea: yt-dlp finds the stream, Opus carries it. On Discord it goes through FFmpeg at 64 kbps; on Twitch, one 160 kbps stream into OBS.'],
 ]
 
 /* Hero mock tracks for the player widget */
@@ -604,6 +663,34 @@ export default function App() {
           ))}
         </div>
 
+        <div className="ops reveal">
+          <div className="terminal" style={{ '--accent': project.accent }}>
+            <div className="terminal-bar"><i /><i /><i /><span>quickstart</span></div>
+            <pre>{project.quickstart.map((l, i) => (
+              <div key={i} className={l.startsWith('#') ? 'dim' : undefined}>
+                {!l.startsWith('#') && !l.startsWith('OBS') && <b>$ </b>}{l}
+              </div>
+            ))}</pre>
+          </div>
+          <dl className="facts">
+            {project.facts.map(([k, v]) => (
+              <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+            ))}
+          </dl>
+        </div>
+
+        {project.roadmap && (
+          <ol className="roadmap reveal" style={{ '--accent': project.accent }}>
+            {project.roadmap.map(([t, st], i) => (
+              <li key={t} className={`rm-${st}`}>
+                <span className="rm-n">{i + 1}</span>
+                <span className="rm-t">{t}</span>
+                <span className="rm-s">{st}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+
         <div className="commands-block reveal">
           <div className="kicker">COMMANDS</div>
           <h3>What you type in chat</h3>
@@ -618,10 +705,28 @@ export default function App() {
         </div>
       </section>
 
+      {/* ── Lineage ─────────────────────────────────────────── */}
+      <section className="lineage shell" data-section="lineage">
+        <div className="reveal">
+          <div className="kicker">02 / HOW THEY FIT</div>
+          <h2>Two platforms.<br /><em>One shared engine room.</em></h2>
+        </div>
+        <div className="lineage-grid reveal">
+          {LINKS.map(([a, b, why]) => (
+            <div key={a + b} className="link-row">
+              <button onClick={() => selectProject(PROJECTS.find((p) => p.name === a).id)}>{a}</button>
+              <span className="link-arrow">⟷</span>
+              <button onClick={() => selectProject(PROJECTS.find((p) => p.name === b).id)}>{b}</button>
+              <p>{why}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── Philosophy ──────────────────────────────────────── */}
       <section className="philosophy shell" data-section="philosophy">
         <div className="reveal">
-          <div className="kicker">02 / APPROACH</div>
+          <div className="kicker">03 / APPROACH</div>
           <h2>
             Built for the machine
             <br />
