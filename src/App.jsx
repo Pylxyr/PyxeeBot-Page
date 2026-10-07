@@ -52,6 +52,10 @@ const PROJECTS = [
       ['!autoplay', 'Toggle similar-track refill'],
       ['!setdj', 'Assign a DJ role'],
     ],
+    shots: [
+      { src: `${BASE}assets/shots/pyxeebot-nowplaying.webp`, w: 1057, h: 577, crop: { src: `${BASE}assets/shots/pyxeebot-nowplaying-crop.webp`, w: 740, h: 375 }, wide: false, alt: 'PyxeeBot now-playing panel in a Discord channel after !p zutomayo saturn', cap: '!p zutomayo saturn queues the top yt-dlp match. The panel carries transport buttons, Queue and Close, and shows who requested the track.' },
+      { src: `${BASE}assets/shots/pyxeebot-vibe.webp`, w: 1127, h: 952, wide: false, alt: 'PyxeeBot curated playlist from !vb yorushika plover with a remove dropdown and Queue All, Save Playlist and Cancel buttons', cap: '!vb yorushika plover asks Last.fm for similar tracks. Here 24 of 25 are selected; trim from the dropdown, then Queue All, Save Playlist or Cancel.' },
+    ],
     quickstart: [
       'git clone https://github.com/Pylxyr/PyxeeBot.git ~/musicbot',
       'cd ~/musicbot',
@@ -171,6 +175,10 @@ const PROJECTS = [
       ['!skip', 'Skip (mods or requester)'],
       ['!radio', 'Toggle auto-radio mode'],
     ],
+    shots: [
+      { src: `${BASE}assets/shots/radio-dashboard.webp`, w: 1600, h: 952, wide: true, alt: 'Twitch Radio desktop dashboard v1.1.0 showing uptime, queue, health checks and OBS source URLs', cap: 'The desktop dashboard (v1.1.0): uptime, OBS listeners, queue, per-component health checks, and the OBS source URLs with copy buttons.' },
+      { src: `${BASE}assets/shots/radio-overlay.webp`, w: 555, h: 202, wide: false, alt: 'Twitch Radio now-playing overlay with the current track and an up-next line', cap: 'The overlay Browser Source: current track, who requested it, and what is up next.' },
+    ],
     quickstart: [
       '# Windows: run "Twitch Radio Setup x.y.z.exe" from Releases',
       'OBS Media Source   http://127.0.0.1:8098/stream.opus',
@@ -265,8 +273,8 @@ const LINKS = [
 
 /* Hero preview data (demo content, shaped like each project's real commands) */
 const PV = {
-  pyxeebot: { chip: 'Discord · now-playing panel', cmd: '!play saturn zutomayo', kind: 'player' },
-  'twitch-radio': { chip: 'OBS · Media Source + overlay', cmd: '!sr saturn zutomayo', kind: 'player' },
+  pyxeebot: { chip: 'Discord · now-playing panel', kind: 'shot', hero: [0] },
+  'twitch-radio': { chip: 'Desktop dashboard + OBS overlay', kind: 'shot', hero: [0, 1] },
   'twitch-bot': { chip: 'Twitch · chat', kind: 'chat' },
   pryxea: { chip: 'Rust · measured, Linux x86-64', kind: 'meter' },
 }
@@ -286,15 +294,6 @@ const METER = [
 ]
 
 /* Hero mock tracks for the player widget */
-const TRACKS = [
-  ['Saturn', 'ZUTOMAYO', '4:10'],
-  ['Plover', 'Yorushika', '4:12'],
-  ['Racing Into the Night', 'YOASOBI', '4:21'],
-  ['No Title', 'Reol', '4:03'],
-  ['Marigold', 'Aimyon', '5:08'],
-]
-const DURATIONS = [250, 252, 261, 243, 308]
-const clock = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0')
 
 /* ------------------------------------------------------------------ */
 /*  Theme toggle                                                      */
@@ -329,9 +328,6 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [progress, setProgress] = useState(0)
   const [activeSection, setActiveSection] = useState('')
-  const [playing, setPlaying] = useState(true)
-  const [active, setActive] = useState(0)
-  const [elapsed, setElapsed] = useState(0)
   const [copied, setCopied] = useState(false)
   const [tabVisible, setTabVisible] = useState(true)
 
@@ -402,21 +398,6 @@ export default function App() {
       document.removeEventListener('pointerdown', onPointer)
     }
   }, [menuOpen])
-
-  /* Hero player */
-  useEffect(() => {
-    if (!playing) return
-    const t = setInterval(() => {
-      setElapsed((v) => {
-        if (v + 1 >= DURATIONS[active]) {
-          setActive((i) => (i + 1) % TRACKS.length)
-          return 0
-        }
-        return v + 1
-      })
-    }, 1000)
-    return () => clearInterval(t)
-  }, [playing, active])
 
   const selectProject = (id) => {
     setActiveProject(id)
@@ -540,45 +521,19 @@ export default function App() {
               </button>
             ))}
           </div>
-          <div className={`player${PV[project.id].kind === 'player' ? '' : ' pv-flex'}`} key={project.id}>
+          <div className={`player pv-flex`} key={project.id}>
             <div className="pv-head">
               <span>{PV[project.id].chip}</span>
-              <span className="pv-demo">{PV[project.id].kind === 'meter' ? 'measured' : 'demo'}</span>
+              <span className="pv-demo">{{ meter: 'measured', shot: 'screenshot', chat: 'demo' }[PV[project.id].kind]}</span>
             </div>
 
-            {PV[project.id].kind === 'player' && (
-              <>
-                <div className="pv-cmd"><b>$</b> {PV[project.id].cmd}</div>
-                <div className="art">
-                  <img src={LOGO} alt="" />
-                </div>
-                <div className="meta">
-                  <div className="track-title">
-                    {TRACKS[active][0]}
-                    <span className={`eq${playing ? '' : ' paused'}`} aria-hidden="true"><i /><i /><i /><i /></span>
-                  </div>
-                  <div className="track-artist">{TRACKS[active][1]}</div>
-                  <div className="progress-row">
-                    <span>{clock(elapsed)}</span>
-                    <div className="bar"><div className="fill" style={{ width: `${(elapsed / DURATIONS[active]) * 100}%` }} /></div>
-                    <span>{TRACKS[active][2]}</span>
-                  </div>
-                  <div className="controls">
-                    <button onClick={() => setActive((active + TRACKS.length - 1) % TRACKS.length)} aria-label="Previous">‹</button>
-                    <button className="play" onClick={() => setPlaying(!playing)} aria-label={playing ? 'Pause' : 'Play'}>{playing ? '❚❚' : '▶'}</button>
-                    <button onClick={() => setActive((active + 1) % TRACKS.length)} aria-label="Next">›</button>
-                  </div>
-                </div>
-                <div className="queue-list">
-                  {TRACKS.map((t, i) => (
-                    <div key={t[0]} className={`queue${i === active ? ' current' : ''}`}>
-                      <span className="q-num">{String(i + 1).padStart(2, '0')}</span>
-                      <span className="q-title">{t[0]}</span>
-                      <span className="q-artist">{t[1]}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
+            {PV[project.id].kind === 'shot' && (
+              <div className="pv-shots">
+                {PV[project.id].hero.map((i) => {
+                  const sh = project.shots[i].crop || project.shots[i]
+                  return <img key={sh.src} src={sh.src} width={sh.w} height={sh.h} alt={sh.alt} />
+                })}
+              </div>
             )}
 
             {PV[project.id].kind === 'chat' && (
@@ -744,6 +699,22 @@ export default function App() {
               </li>
             ))}
           </ol>
+        )}
+
+        {project.shots && (
+          <div className="shots reveal">
+            <div className="kicker">IN USE</div>
+            <div className="shots-grid">
+              {project.shots.map((sh) => (
+                <figure key={sh.src} className={sh.wide ? 'wide' : undefined}>
+                  <a href={sh.src} target="_blank" rel="noopener noreferrer">
+                    <img src={sh.src} width={sh.w} height={sh.h} alt={sh.alt} loading="lazy" />
+                  </a>
+                  <figcaption>{sh.cap}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
         )}
 
         <div className="commands-block reveal">
