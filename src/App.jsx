@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import './App.css'
 
+import { Mock } from './Mockups'
+
 const BASE = import.meta.env.BASE_URL
 const LOGO = `${BASE}assets/logo.png`
 
@@ -52,9 +54,9 @@ const PROJECTS = [
       ['!autoplay', 'Toggle similar-track refill'],
       ['!setdj', 'Assign a DJ role'],
     ],
-    shots: [
-      { src: `${BASE}assets/shots/pyxeebot-nowplaying.webp`, w: 1057, h: 577, crop: { src: `${BASE}assets/shots/pyxeebot-nowplaying-crop.webp`, w: 740, h: 375 }, wide: false, alt: 'PyxeeBot now-playing panel in a Discord channel after !p zutomayo saturn', cap: '!p zutomayo saturn queues the top yt-dlp match. The panel carries transport buttons, Queue and Close, and shows who requested the track.' },
-      { src: `${BASE}assets/shots/pyxeebot-vibe.webp`, w: 1127, h: 952, wide: false, alt: 'PyxeeBot curated playlist from !vb yorushika plover with a remove dropdown and Queue All, Save Playlist and Cancel buttons', cap: '!vb yorushika plover asks Last.fm for similar tracks. Here 24 of 25 are selected; trim from the dropdown, then Queue All, Save Playlist or Cancel.' },
+    previews: [
+      { m: 'dcNow', wide: false, cap: '!p zutomayo saturn queues the top yt-dlp match. The panel carries transport buttons, Queue and Close, and shows who requested the track.' },
+      { m: 'dcVibe', wide: false, cap: '!vb yorushika plover asks Last.fm for similar tracks. Here 24 of 25 are selected; trim from the dropdown, then Queue All, Save Playlist or Cancel.' },
     ],
     quickstart: [
       'git clone https://github.com/Pylxyr/PyxeeBot.git ~/musicbot',
@@ -117,6 +119,10 @@ const PROJECTS = [
       ['!predict', 'Start a Prediction'],
       ['!counter', 'Named counters'],
     ],
+    previews: [
+      { m: 'chat', wide: false, cap: 'Points, quotes and moderation run from chat; the bot answers as itself.' },
+      { m: 'console', wide: false, cap: 'The local web server (127.0.0.1:8098 by default) lists every command and serves /healthz.' },
+    ],
     quickstart: [
       'git clone https://github.com/Pylxyr/pyxee-twitch-bot.git',
       'cd pyxee-twitch-bot && bash ./deploy/setup.sh',
@@ -175,9 +181,9 @@ const PROJECTS = [
       ['!skip', 'Skip (mods or requester)'],
       ['!radio', 'Toggle auto-radio mode'],
     ],
-    shots: [
-      { src: `${BASE}assets/shots/radio-dashboard.webp`, w: 1600, h: 952, wide: true, alt: 'Twitch Radio desktop dashboard v1.1.0 showing uptime, queue, health checks and OBS source URLs', cap: 'The desktop dashboard (v1.1.0): uptime, OBS listeners, queue, per-component health checks, and the OBS source URLs with copy buttons.' },
-      { src: `${BASE}assets/shots/radio-overlay.webp`, w: 555, h: 202, wide: false, alt: 'Twitch Radio now-playing overlay with the current track and an up-next line', cap: 'The overlay Browser Source: current track, who requested it, and what is up next.' },
+    previews: [
+      { m: 'dash', wide: true, cap: 'The desktop dashboard (v1.1.0): uptime, OBS listeners, queue, per-component health checks, and the OBS source URLs with copy buttons.' },
+      { m: 'overlay', wide: false, cap: 'The overlay Browser Source: current track, who requested it, and what is up next.' },
     ],
     quickstart: [
       '# Windows: run "Twitch Radio Setup x.y.z.exe" from Releases',
@@ -237,6 +243,10 @@ const PROJECTS = [
       ['!sq', 'Song queue (planned)'],
       ['!radio', 'Autoplay toggle (planned)'],
     ],
+    previews: [
+      { m: 'meter', wide: false, cap: 'Measured on Linux x86-64: binary size and resident memory from idle to a full streaming load.' },
+      { m: 'overlay', wide: false, cap: 'The overlay and WebSocket hub are already implemented (roadmap step 1); Twitch comes next.' },
+    ],
     quickstart: [
       'git clone https://github.com/Pylxyr/Pryxea.git && cd Pryxea',
       'cargo build --release   # needs Rust 1.85+ and cmake',
@@ -273,25 +283,11 @@ const LINKS = [
 
 /* Hero preview data (demo content, shaped like each project's real commands) */
 const PV = {
-  pyxeebot: { chip: 'Discord · now-playing panel', kind: 'shot', hero: [0] },
-  'twitch-radio': { chip: 'Desktop dashboard + OBS overlay', kind: 'shot', hero: [0, 1] },
-  'twitch-bot': { chip: 'Twitch · chat', kind: 'chat' },
-  pryxea: { chip: 'Rust · measured, Linux x86-64', kind: 'meter' },
+  pyxeebot: { chip: 'Discord · now-playing panel', hero: ['dcNow'] },
+  'twitch-radio': { chip: 'Desktop dashboard + OBS overlay', hero: ['dashLite', 'overlay'] },
+  'twitch-bot': { chip: 'Twitch · chat', hero: ['chat'] },
+  pryxea: { chip: 'Rust · measured footprint', hero: ['meter'] },
 }
-const CHAT = [
-  ['mira', '!daily'],
-  ['pyxee', '@mira daily points claimed', 1],
-  ['kenji', '!deaths++'],
-  ['pyxee', 'deaths counter bumped', 1],
-  ['mod_ren', '!permit @sol'],
-  ['pyxee', '@sol may post one link', 1],
-]
-const METER = [
-  ['Binary (server only)', '0.76 MB', 0.76],
-  ['Idle RSS, 1 thread', '2.5 MB', 2.5],
-  ['20 WebSockets + 5 listeners', '5.4 MB', 5.4],
-  ['Streaming, peak RSS', '11 MB', 11],
-]
 
 /* Hero mock tracks for the player widget */
 
@@ -356,18 +352,22 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    const sections = document.querySelectorAll('[data-section]')
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActiveSection(e.target.getAttribute('data-section') || '')
-        })
-      },
-      { rootMargin: '-40% 0px -50% 0px' },
-    )
-    sections.forEach((s) => obs.observe(s))
-    return () => obs.disconnect()
-  }, [activeProject])
+    let raf = 0
+    const calc = () => {
+      raf = 0
+      const els = [...document.querySelectorAll('[data-section]')]
+      const line = window.innerHeight * 0.35
+      let cur = ''
+      els.forEach((el) => { if (el.getBoundingClientRect().top <= line) cur = el.dataset.section })
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4 && els.length) cur = els[els.length - 1].dataset.section
+      setActiveSection(cur)
+    }
+    const on = () => { if (!raf) raf = requestAnimationFrame(calc) }
+    calc()
+    window.addEventListener('scroll', on, { passive: true })
+    window.addEventListener('resize', on)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('scroll', on); window.removeEventListener('resize', on) }
+  }, [])
 
   /* Reveal on scroll */
   useEffect(() => {
@@ -378,7 +378,7 @@ export default function App() {
           if (e.isIntersecting) e.target.classList.add('in')
         })
       },
-      { threshold: 0.12 },
+      { threshold: 0, rootMargin: '0px 0px 160px 0px' },
     )
     els.forEach((el) => obs.observe(el))
     return () => obs.disconnect()
@@ -399,13 +399,14 @@ export default function App() {
     }
   }, [menuOpen])
 
-  const selectProject = (id) => {
+  /* One path for every project control. scroll:false keeps the viewer on the hero preview. */
+  const selectProject = (id, { scroll = true } = {}) => {
     setActiveProject(id)
+    if (!scroll) return
     setTabVisible(false)
     requestAnimationFrame(() => {
       setTabVisible(true)
-      const el = document.getElementById('project-detail')
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      document.getElementById('project-detail')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
   }
 
@@ -515,7 +516,7 @@ export default function App() {
                 aria-selected={p.id === activeProject}
                 className={p.id === activeProject ? 'on' : ''}
                 style={{ '--accent': p.accent }}
-                onClick={() => setActiveProject(p.id)}
+                onClick={() => selectProject(p.id, { scroll: false })}
               >
                 {p.name.replace('Pyxee ', '')}
               </button>
@@ -524,40 +525,14 @@ export default function App() {
           <div className={`player pv-flex`} key={project.id}>
             <div className="pv-head">
               <span>{PV[project.id].chip}</span>
-              <span className="pv-demo">{{ meter: 'measured', shot: 'screenshot', chat: 'demo' }[PV[project.id].kind]}</span>
+              <a className="pv-demo" href="#project-detail">Details ↓</a>
             </div>
 
-            {PV[project.id].kind === 'shot' && (
-              <div className="pv-shots">
-                {PV[project.id].hero.map((i) => {
-                  const sh = project.shots[i].crop || project.shots[i]
-                  return <img key={sh.src} src={sh.src} width={sh.w} height={sh.h} alt={sh.alt} />
-                })}
-              </div>
-            )}
-
-            {PV[project.id].kind === 'chat' && (
-              <div className="chat">
-                {CHAT.map(([u, m, bot], i) => (
-                  <div key={i} className={`chat-line${bot ? ' bot' : ''}`} style={{ animationDelay: `${i * 0.35}s` }}>
-                    <b>{u}</b><span>{m}</span>
-                  </div>
-                ))}
-                <div className="chat-foot">/commands · /settings · /healthz</div>
-              </div>
-            )}
-
-            {PV[project.id].kind === 'meter' && (
-              <div className="meter">
-                {METER.map(([label, val, n]) => (
-                  <div key={label} className="meter-row">
-                    <div><span>{label}</span><b>{val}</b></div>
-                    <div className="meter-bar"><i style={{ width: `${(n / 11) * 100}%` }} /></div>
-                  </div>
-                ))}
-                <div className="chat-foot">steps 1–3 of 6 done · Twitch is next</div>
-              </div>
-            )}
+            <div className="pv-body">
+              {PV[project.id].hero.map((id) => (
+                <Mock key={id} id={id} cmds={project.commands} />
+              ))}
+            </div>
           </div>
         </div>
       </header>
@@ -701,16 +676,14 @@ export default function App() {
           </ol>
         )}
 
-        {project.shots && (
-          <div className="shots reveal">
-            <div className="kicker">IN USE</div>
+        {project.previews && (
+          <div className="shots reveal" style={{ '--accent': project.accent }}>
+            <div className="kicker">IN USE · REDRAWN FROM THE REAL UI</div>
             <div className="shots-grid">
-              {project.shots.map((sh) => (
-                <figure key={sh.src} className={sh.wide ? 'wide' : undefined}>
-                  <a href={sh.src} target="_blank" rel="noopener noreferrer">
-                    <img src={sh.src} width={sh.w} height={sh.h} alt={sh.alt} loading="lazy" />
-                  </a>
-                  <figcaption>{sh.cap}</figcaption>
+              {project.previews.map((pv) => (
+                <figure key={pv.m} className={pv.wide ? 'wide' : undefined}>
+                  <Mock id={pv.m} cmds={project.commands} />
+                  <figcaption>{pv.cap}</figcaption>
                 </figure>
               ))}
             </div>
