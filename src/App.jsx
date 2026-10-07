@@ -263,6 +263,28 @@ const LINKS = [
   ['PyxeeBot', 'Twitch Radio', 'Same playback core idea: yt-dlp finds the stream, Opus carries it. On Discord it goes through FFmpeg at 64 kbps; on Twitch, one 160 kbps stream into OBS.'],
 ]
 
+/* Hero preview data (demo content, shaped like each project's real commands) */
+const PV = {
+  pyxeebot: { chip: 'Discord · now-playing panel', cmd: '!play saturn zutomayo', kind: 'player' },
+  'twitch-radio': { chip: 'OBS · Media Source + overlay', cmd: '!sr saturn zutomayo', kind: 'player' },
+  'twitch-bot': { chip: 'Twitch · chat', kind: 'chat' },
+  pryxea: { chip: 'Rust · measured, Linux x86-64', kind: 'meter' },
+}
+const CHAT = [
+  ['mira', '!daily'],
+  ['pyxee', '@mira daily points claimed', 1],
+  ['kenji', '!deaths++'],
+  ['pyxee', 'deaths counter bumped', 1],
+  ['mod_ren', '!permit @sol'],
+  ['pyxee', '@sol may post one link', 1],
+]
+const METER = [
+  ['Binary (server only)', '0.76 MB', 0.76],
+  ['Idle RSS, 1 thread', '2.5 MB', 2.5],
+  ['20 WebSockets + 5 listeners', '5.4 MB', 5.4],
+  ['Streaming, peak RSS', '11 MB', 11],
+]
+
 /* Hero mock tracks for the player widget */
 const TRACKS = [
   ['Saturn', 'ZUTOMAYO', '4:10'],
@@ -503,51 +525,84 @@ export default function App() {
           </div>
         </div>
 
-        <div className="hero-visual reveal delay-1">
-          <div className="player">
-            <div className="art">
-              <img src={LOGO} alt="" />
-              <div className="eq">
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
+        <div className="hero-visual reveal delay-1" style={{ '--accent': project.accent }}>
+          <div className="hero-switch" role="tablist" aria-label="Preview project">
+            {PROJECTS.map((p) => (
+              <button
+                key={p.id}
+                role="tab"
+                aria-selected={p.id === activeProject}
+                className={p.id === activeProject ? 'on' : ''}
+                style={{ '--accent': p.accent }}
+                onClick={() => setActiveProject(p.id)}
+              >
+                {p.name.replace('Pyxee ', '')}
+              </button>
+            ))}
+          </div>
+          <div className={`player${PV[project.id].kind === 'player' ? '' : ' pv-flex'}`} key={project.id}>
+            <div className="pv-head">
+              <span>{PV[project.id].chip}</span>
+              <span className="pv-demo">{PV[project.id].kind === 'meter' ? 'measured' : 'demo'}</span>
             </div>
-            <div className="meta">
-              <div className="track-title">{TRACKS[active][0]}</div>
-              <div className="track-artist">{TRACKS[active][1]}</div>
-              <div className="progress-row">
-                <span>{clock(elapsed)}</span>
-                <div className="bar">
-                  <div
-                    className="fill"
-                    style={{ width: `${(elapsed / DURATIONS[active]) * 100}%` }}
-                  />
+
+            {PV[project.id].kind === 'player' && (
+              <>
+                <div className="pv-cmd"><b>$</b> {PV[project.id].cmd}</div>
+                <div className="art">
+                  <img src={LOGO} alt="" />
                 </div>
-                <span>{TRACKS[active][2]}</span>
-              </div>
-              <div className="controls">
-                <button onClick={() => setActive((active + TRACKS.length - 1) % TRACKS.length)} aria-label="Previous">
-                  ‹
-                </button>
-                <button className="play" onClick={() => setPlaying(!playing)} aria-label={playing ? 'Pause' : 'Play'}>
-                  {playing ? '❚❚' : '▶'}
-                </button>
-                <button onClick={() => setActive((active + 1) % TRACKS.length)} aria-label="Next">
-                  ›
-                </button>
-              </div>
-            </div>
-            <div className="queue-list">
-              {TRACKS.map((t, i) => (
-                <div key={t[0]} className={`queue${i === active ? ' current' : ''}`}>
-                  <span className="q-num">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="q-title">{t[0]}</span>
-                  <span className="q-artist">{t[1]}</span>
+                <div className="meta">
+                  <div className="track-title">
+                    {TRACKS[active][0]}
+                    <span className={`eq${playing ? '' : ' paused'}`} aria-hidden="true"><i /><i /><i /><i /></span>
+                  </div>
+                  <div className="track-artist">{TRACKS[active][1]}</div>
+                  <div className="progress-row">
+                    <span>{clock(elapsed)}</span>
+                    <div className="bar"><div className="fill" style={{ width: `${(elapsed / DURATIONS[active]) * 100}%` }} /></div>
+                    <span>{TRACKS[active][2]}</span>
+                  </div>
+                  <div className="controls">
+                    <button onClick={() => setActive((active + TRACKS.length - 1) % TRACKS.length)} aria-label="Previous">‹</button>
+                    <button className="play" onClick={() => setPlaying(!playing)} aria-label={playing ? 'Pause' : 'Play'}>{playing ? '❚❚' : '▶'}</button>
+                    <button onClick={() => setActive((active + 1) % TRACKS.length)} aria-label="Next">›</button>
+                  </div>
                 </div>
-              ))}
-            </div>
+                <div className="queue-list">
+                  {TRACKS.map((t, i) => (
+                    <div key={t[0]} className={`queue${i === active ? ' current' : ''}`}>
+                      <span className="q-num">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="q-title">{t[0]}</span>
+                      <span className="q-artist">{t[1]}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {PV[project.id].kind === 'chat' && (
+              <div className="chat">
+                {CHAT.map(([u, m, bot], i) => (
+                  <div key={i} className={`chat-line${bot ? ' bot' : ''}`} style={{ animationDelay: `${i * 0.35}s` }}>
+                    <b>{u}</b><span>{m}</span>
+                  </div>
+                ))}
+                <div className="chat-foot">/commands · /settings · /healthz</div>
+              </div>
+            )}
+
+            {PV[project.id].kind === 'meter' && (
+              <div className="meter">
+                {METER.map(([label, val, n]) => (
+                  <div key={label} className="meter-row">
+                    <div><span>{label}</span><b>{val}</b></div>
+                    <div className="meter-bar"><i style={{ width: `${(n / 11) * 100}%` }} /></div>
+                  </div>
+                ))}
+                <div className="chat-foot">steps 1–3 of 6 done · Twitch is next</div>
+              </div>
+            )}
           </div>
         </div>
       </header>
