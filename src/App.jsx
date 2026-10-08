@@ -744,7 +744,7 @@ export default function App() {
 
       <footer className="footer shell">
         <Brand />
-        <span>Open-source projects by Pylxyr.</span>
+        <span>Open-source projects by Pylxyr. Vibe coded with AI.</span>
         <div>
           <a href={GITHUB} target="_blank" rel="noopener noreferrer">
             GitHub ↗

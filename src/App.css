@@ -14,14 +14,15 @@
 :root {
   color-scheme: dark;
 
-  --bg: #0a0a0b;
-  --surface: #111113;
-  --raised: #17171a;
-  --ink: #ededef;
-  --ink-2: #a1a1a8;
-  --ink-3: #80808a;
-  --line: #222226;
-  --line-2: #34343a;
+  /* Dark ramp: surfaces step clearly apart from the page, text starts at 8:1. */
+  --bg: #0b0b0d;
+  --surface: #1a1a1f;
+  --raised: #24242b;
+  --ink: #f4f4f6;
+  --ink-2: #cdcdd4;
+  --ink-3: #a3a3ad;
+  --line: #34343d;
+  --line-2: #4a4a54;
   --accent: #5cbcfc;
   --on-accent: #04111c;
 
@@ -788,6 +789,10 @@ h4 {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+}
+
+:root:not([data-theme='light']) .terminal {
+  border-color: var(--line-2);
 }
 
 .terminal pre {
