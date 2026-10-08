@@ -132,18 +132,18 @@ function Overlay() {
 }
 
 const CHAT = [
-  ['mira', '#e8a04a', '!daily'], ['pyxee', 0, '@mira daily points claimed'],
-  ['kenji', '#4d8fe0', '!deaths++'], ['pyxee', 0, 'deaths counter bumped'],
-  ['mod_ren', '#3ecf8e', '!permit @sol', 1], ['pyxee', 0, '@sol may post one link'],
+  ['mira', 0, '!daily'], ['pyxee', 1, '@mira daily points claimed'],
+  ['kenji', 0, '!deaths++'], ['pyxee', 1, 'deaths counter bumped'],
+  ['mod_ren', 0, '!permit @sol', 1], ['pyxee', 1, '@sol may post one link'],
 ]
 function Chat() {
   return (
     <div className="mk">
       <div className="mk-chead">Stream chat</div>
-      {CHAT.map(([u, col, m, mod], i) => (
-        <div key={i} className={`mk-cl${col ? '' : ' bot'}`} style={{ animationDelay: `${i * 0.3}s` }}>
+      {CHAT.map(([u, isBot, m, mod], i) => (
+        <div key={i} className={`mk-cl${isBot ? ' bot' : ''}`}>
           {mod && <em className="mk-mod">MOD</em>}
-          <b style={col ? { color: col } : undefined}>{u}</b><span>{m}</span>
+          <b>{u}</b><span>{m}</span>
         </div>
       ))}
     </div>

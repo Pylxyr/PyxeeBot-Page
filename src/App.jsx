@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import './App.css'
 
 import { Mock } from './Mockups'
@@ -16,30 +16,25 @@ const PROJECTS = [
     name: 'PyxeeBot',
     tag: 'Discord',
     status: 'Stable',
-    blurb: 'A self-hosted Discord music bot that respects the queue.',
+    blurb: 'Self-hosted music bot for Discord.',
     description:
-      'Stream from YouTube, curate with Last.fm, keep the queue alive across restarts. Built for music communities that care about the right track — and for a single-core VPS that still has headroom left.',
+      'Plays YouTube audio in Discord voice channels. Builds similar-track queues from Last.fm and restores the queue after a restart. Runs on a single-core VPS with 1 GB of RAM.',
     stack: ['Python 3.11+', 'discord.py', 'yt-dlp', 'aiosqlite'],
     repo: 'https://github.com/Pylxyr/PyxeeBot',
-    accent: '#e8a04a',
     highlights: [
       {
-        icon: '⌕',
-        title: 'Search that works',
-        text: '!play queues yt-dlp’s top match instantly. Wrong track? !search shows up to 10 candidates so you pick the right one.',
+        title: 'Search',
+        text: '!play queues yt-dlp’s top match. !search lists up to 10 candidates so you can pick the right one.',
       },
       {
-        icon: '✦',
         title: 'Last.fm curation',
-        text: '!vibe builds a similar-track queue you can trim. !autoplay keeps the room alive when the list runs dry. Optional free API key.',
+        text: '!vibe builds a similar-track queue you can trim before adding. !autoplay queues a similar track when the queue runs empty. Both need a free Last.fm API key; the bot runs without one.',
       },
       {
-        icon: '◉',
-        title: 'Survives restarts',
-        text: 'Queues, playlists and per-server settings live in SQLite. Background prefetch and near-end preload keep gaps out of the set.',
+        title: 'Persistence',
+        text: 'Queues, playlists and per-server settings are stored in SQLite. Background prefetch and near-end preload reduce gaps between tracks.',
       },
       {
-        icon: '⚙',
         title: 'Server control',
         text: 'DJ roles, vote-skip, hybrid slash commands, per-server prefix, idle and empty-channel timeouts — all configurable.',
       },
@@ -81,30 +76,25 @@ const PROJECTS = [
     name: 'Pyxee Twitch Bot',
     tag: 'Twitch',
     status: 'Stable',
-    blurb: 'Moderation, economy and engagement for your channel.',
+    blurb: 'Chat bot for Twitch: points, moderation and commands.',
     description:
       'A standalone Twitch chat bot with a points economy, AutoMod, custom commands, giveaways, predictions and a password-gated settings dashboard. Everything runs on your machine — no cloud account required.',
     stack: ['Python 3.11+', 'TwitchIO 3', 'SQLite', 'aiohttp'],
     repo: 'https://github.com/Pylxyr/pyxee-twitch-bot',
-    accent: '#9146ff',
     highlights: [
       {
-        icon: '◈',
         title: 'Points & ranks',
         text: 'Passive points and watch-time, ranks from Newcomer to Legend, !daily, !give, opt-in !gamble and !duel. Subs can earn at a higher rate.',
       },
       {
-        icon: '🛡',
-        title: 'AutoMod that listens',
+        title: 'AutoMod',
         text: 'Link, caps and blocked-term filters with VIP/sub exemptions, !permit, warn-then-timeout escalation and optional message deletion.',
       },
       {
-        icon: '⌘',
         title: 'Custom commands',
         text: 'Mod-managed with variables, cooldowns and role gates. Automatically listed on the public /commands reference page.',
       },
       {
-        icon: '◎',
         title: 'Alerts & tools',
         text: 'Follow/sub/raid/cheer announcements, Hype Train, native Predictions, timers, counters, quotes, 8-ball, viewer queue and giveaways.',
       },
@@ -147,30 +137,25 @@ const PROJECTS = [
     name: 'Twitch Radio',
     tag: 'OBS · Stream',
     status: 'Stable',
-    blurb: 'Song requests that play straight into OBS.',
+    blurb: 'Song requests for Twitch, played into OBS.',
     description:
       'Viewers type !sr in chat. The bot queues the track, serves one continuous Opus stream and a now-playing overlay. Runs entirely on your PC — 127.0.0.1 only, no telemetry, Windows installer or Linux from source.',
     stack: ['Python 3.11+', 'Electron', 'yt-dlp', 'ffmpeg', 'Opus'],
     repo: 'https://github.com/Pylxyr/Twitch-Radio',
-    accent: '#ff4d6d',
     highlights: [
       {
-        icon: '▶',
         title: 'One continuous stream',
         text: 'OBS Media Source points at http://127.0.0.1:8098/stream.opus. Gapless hand-over, silence when idle instead of a disconnect.',
       },
       {
-        icon: '▣',
         title: 'Now-playing overlay',
         text: 'Transparent browser source at /overlay. Shows the current track and requester — size it however you like in OBS.',
       },
       {
-        icon: '⚡',
-        title: 'Stays out of the way',
+        title: 'Resource use',
         text: 'Lookups run in short-lived processes that exit after idle. Encoder only runs while something is listening. Under 100 MB when quiet.',
       },
       {
-        icon: '🖥',
         title: 'Desktop app',
         text: 'Windows installer bundles ffmpeg. Close to tray and the window is truly gone — no hidden Chromium. Linux AppImage available.',
       },
@@ -208,30 +193,25 @@ const PROJECTS = [
     name: 'Pryxea',
     tag: 'Rust · WIP',
     status: 'In progress',
-    blurb: 'Twitch Radio, rewritten for minimal footprint.',
+    blurb: 'Rust rewrite of Twitch Radio.',
     description:
-      'A ground-up Rust rewrite of Twitch-Radio with one goal: minimal binary size and memory. One native binary, in-process Opus encode, no Electron, no bundled Python, no ffmpeg processes. Audio and lookups work today; the Twitch side is next.',
+      'A Rust rewrite of Twitch Radio aimed at minimal binary size and memory use. One native binary, in-process Opus encode, no Electron, no bundled Python, no ffmpeg processes. Audio and lookups work today; the Twitch side is next.',
     stack: ['Rust 1.85+', 'tokio', 'hyper', 'symphonia', 'rustls', 'libopus'],
     repo: 'https://github.com/Pylxyr/Pryxea',
-    accent: '#3ecf8e',
     highlights: [
       {
-        icon: '◇',
-        title: 'Tiny binary',
+        title: 'Binary size',
         text: 'Server binary ~0.76 MB. Full lookup + engine example ~2.23 MB. Idle RSS ~2.5 MB on one thread.',
       },
       {
-        icon: '◎',
         title: 'In-process audio',
         text: 'Decode (Opus / AAC-LC), resample, encode and publish five 20 ms Opus packets per Ogg page — all inside the same process.',
       },
       {
-        icon: '⛓',
         title: 'On-demand tools',
         text: 'yt-dlp and QuickJS are downloaded on first use, hash-checked, and killed with their process tree when a lookup finishes.',
       },
       {
-        icon: '→',
         title: 'Roadmap',
         text: 'Steps 1–3 complete (config, audio engine, lookups). Twitch EventSub and the five chat commands are next, then queue persistence and packaging.',
       },
@@ -278,7 +258,7 @@ const PROJECTS = [
 const LINKS = [
   ['Twitch Radio', 'Pryxea', 'Pryxea is a ground-up Rust rewrite of Twitch Radio. Same chat commands, same OBS endpoints, and an existing .env carries over.'],
   ['Pyxee Twitch Bot', 'Twitch Radio', 'Both build on TwitchIO 3.3.2 and aiohttp, and each serves its own local web UI on port 8098 by default. Pick the moderation bot, the radio, or both.'],
-  ['PyxeeBot', 'Twitch Radio', 'Same playback core idea: yt-dlp finds the stream, Opus carries it. On Discord it goes through FFmpeg at 64 kbps; on Twitch, one 160 kbps stream into OBS.'],
+  ['PyxeeBot', 'Twitch Radio', 'Both use yt-dlp to find the stream and Opus to carry it. On Discord the audio goes through FFmpeg at 64 kbps; on Twitch it is one 160 kbps stream into OBS.'],
 ]
 
 /* Hero preview data (demo content, shaped like each project's real commands) */
@@ -289,10 +269,25 @@ const PV = {
   pryxea: { chip: 'Rust · measured footprint', hero: ['meter'] },
 }
 
-/* Hero mock tracks for the player widget */
+const GITHUB = 'https://github.com/Pylxyr'
+
+const APPROACH = [
+  [
+    'Local first',
+    'Everything runs on your hardware. Discord bots on a free-tier VPS, Twitch tools on the same PC you stream from. No mandatory accounts, no cloud dependency.',
+  ],
+  [
+    'Playback continuity',
+    'Queue persistence, prefetch, gapless hand-over and explicit skip rules. Playback resumes after a restart.',
+  ],
+  [
+    'Small footprint',
+    'The Discord bot targets a host with 1 GB of RAM. The Rust radio idles at about 2.5 MB.',
+  ],
+]
 
 /* ------------------------------------------------------------------ */
-/*  Theme toggle                                                      */
+/*  Small pieces                                                      */
 /* ------------------------------------------------------------------ */
 function ThemeToggle({ theme, onToggle }) {
   return (
@@ -300,12 +295,33 @@ function ThemeToggle({ theme, onToggle }) {
       className="theme-toggle"
       onClick={onToggle}
       aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-      title={theme === 'dark' ? 'Light' : 'Dark'}
     >
-      <span className="theme-icon" data-theme={theme}>
-        {theme === 'dark' ? '☀' : '☾'}
-      </span>
+      {theme === 'dark' ? 'Light' : 'Dark'}
     </button>
+  )
+}
+
+function Brand({ logo = true }) {
+  return (
+    <a className="brand" href="#top">
+      {logo && <img className="brand-logo" src={LOGO} alt="" width="22" height="22" />}
+      <span>
+        Pyxee<span>Suite</span>
+      </span>
+    </a>
+  )
+}
+
+/* Label rail (cols 1–3) + content (cols 4–12) */
+function Section({ n, label, className = '', children, ...rest }) {
+  return (
+    <section className={`section shell ${className}`} {...rest}>
+      <div className="rail">
+        <span className="idx">{n}</span>
+        <span>{label}</span>
+      </div>
+      <div className="body">{children}</div>
+    </section>
   )
 }
 
@@ -322,7 +338,6 @@ export default function App() {
   })
   const [activeProject, setActiveProject] = useState('pyxeebot')
   const [menuOpen, setMenuOpen] = useState(false)
-  const [progress, setProgress] = useState(0)
   const [activeSection, setActiveSection] = useState('')
   const [copied, setCopied] = useState(false)
   const [tabVisible, setTabVisible] = useState(true)
@@ -340,17 +355,7 @@ export default function App() {
     })
   }, [])
 
-  /* Scroll progress + section observer */
-  useEffect(() => {
-    const onScroll = () => {
-      const h = document.documentElement.scrollHeight - window.innerHeight
-      setProgress(h > 0 ? window.scrollY / h : 0)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
+  /* Section observer (nav highlight) */
   useEffect(() => {
     let raf = 0
     const calc = () => {
@@ -418,17 +423,10 @@ export default function App() {
 
   return (
     <main>
-      <div className="scroll-progress" style={{ transform: `scaleX(${progress})` }} />
-
       {/* ── Nav ─────────────────────────────────────────────── */}
       <nav className="nav">
         <div className="nav-inner shell">
-          <a className="brand" href="#top">
-            <img className="brand-logo" src={LOGO} alt="Pyxee" width="29" height="29" />
-            <span>
-              Pyxee<span>Suite</span>
-            </span>
-          </a>
+          <Brand />
           <div className="links">
             <a href="#projects" className={activeSection === 'projects' ? 'active' : ''}>
               Projects
@@ -436,7 +434,7 @@ export default function App() {
             <a href="#project-detail" className={activeSection === 'detail' ? 'active' : ''}>
               Details
             </a>
-            <a href="https://github.com/Pylxyr" target="_blank" rel="noopener noreferrer">
+            <a href={GITHUB} target="_blank" rel="noopener noreferrer">
               GitHub ↗
             </a>
           </div>
@@ -478,36 +476,34 @@ export default function App() {
             {p.name}
           </button>
         ))}
-        <a href="https://github.com/Pylxyr" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
+        <a href={GITHUB} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
           GitHub ↗
         </a>
       </div>
 
       {/* ── Hero ────────────────────────────────────────────── */}
       <header className="hero shell" id="top" data-section="hero">
-        <div className="hero-copy reveal">
-          <div className="kicker">OPEN SOURCE · SELF-HOSTED</div>
-          <h1>
-            Music &amp; chat tools
-            <br />
-            <em>that stay out of the way.</em>
-          </h1>
+        <div className="hero-head reveal">
+          <div className="label">Open source · Self-hosted</div>
+          <h1>Self-hosted music and chat tools for Discord and Twitch.</h1>
+        </div>
+
+        <div className="hero-side reveal">
           <p className="lede">
-            Four focused projects for Discord and Twitch — from a Discord music bot that respects the
-            queue, to a full Twitch chat suite, a song-request radio for OBS, and its minimal Rust
-            rewrite.
+            Four open-source projects: a Discord music bot, a Twitch chat bot, a song-request radio
+            for OBS, and a Rust rewrite of that radio. Each one runs on your own machine.
           </p>
           <div className="hero-actions">
             <a className="button" href="#projects">
-              Explore projects
+              View projects
             </a>
-            <a className="button ghost" href="https://github.com/Pylxyr" target="_blank" rel="noopener noreferrer">
-              View on GitHub ↗
+            <a className="button ghost" href={GITHUB} target="_blank" rel="noopener noreferrer">
+              GitHub ↗
             </a>
           </div>
         </div>
 
-        <div className="hero-visual reveal delay-1" style={{ '--accent': project.accent }}>
+        <div className="hero-visual reveal">
           <div className="hero-switch" role="tablist" aria-label="Preview project">
             {PROJECTS.map((p) => (
               <button
@@ -515,19 +511,17 @@ export default function App() {
                 role="tab"
                 aria-selected={p.id === activeProject}
                 className={p.id === activeProject ? 'on' : ''}
-                style={{ '--accent': p.accent }}
                 onClick={() => selectProject(p.id, { scroll: false })}
               >
                 {p.name.replace('Pyxee ', '')}
               </button>
             ))}
           </div>
-          <div className={`player pv-flex`} key={project.id}>
+          <div className="preview" key={project.id}>
             <div className="pv-head">
               <span>{PV[project.id].chip}</span>
               <a className="pv-demo" href="#project-detail">Details ↓</a>
             </div>
-
             <div className="pv-body">
               {PV[project.id].hero.map((id) => (
                 <Mock key={id} id={id} cmds={project.commands} />
@@ -537,73 +531,63 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── Project cards ───────────────────────────────────── */}
-      <section className="projects shell" id="projects" data-section="projects">
+      {/* ── Projects ────────────────────────────────────────── */}
+      <Section n="01" label="Projects" id="projects" data-section="projects" className="projects">
         <div className="section-head reveal">
-          <div className="kicker">01 / THE SUITE</div>
-          <h2>
-            Four tools.
-            <br />
-            <em>One philosophy.</em>
-          </h2>
-          <p>
-            Self-hosted, open source, and built to run on the hardware you already have. No accounts,
-            no telemetry, no mandatory cloud.
+          <h2>Four projects</h2>
+          <p className="prose">
+            Self-hosted and open source. No Pyxee account, no telemetry, no required cloud service.
           </p>
         </div>
 
-        <div className="project-grid">
+        <div className="index reveal">
           {PROJECTS.map((p, i) => (
             <button
               key={p.id}
-              className={`project-card reveal delay-${Math.min(i + 1, 3)}${p.id === activeProject ? ' active' : ''}`}
-              style={{ '--accent': p.accent }}
+              className={`index-row${p.id === activeProject ? ' active' : ''}`}
               onClick={() => selectProject(p.id)}
             >
-              <div className="card-top">
-                <span className="card-tag">{p.tag}</span>
-                <span className={`card-status status-${p.status === 'Stable' ? 'stable' : 'wip'}`}>
-                  {p.status}
-                </span>
-              </div>
-              <h3>{p.name}</h3>
-              <p>{p.blurb}</p>
-              <div className="card-stack">
-                {p.stack.slice(0, 3).map((s) => (
-                  <span key={s}>{s}</span>
-                ))}
-              </div>
-              <div className="card-footer">
-                <span className="card-cta">View details →</span>
-              </div>
+              <span className="ix-n">{String(i + 1).padStart(2, '0')}</span>
+              <span className="ix-main">
+                <b>{p.name}</b>
+                <span>{p.blurb}</span>
+              </span>
+              <span className="ix-stack">{p.stack.slice(0, 3).join(' · ')}</span>
+              <span className={`status ${p.status === 'Stable' ? 'stable' : 'wip'}`}>{p.status}</span>
+              <span className="ix-go">Details →</span>
             </button>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/* ── Project detail ──────────────────────────────────── */}
       <section
-        className={`detail shell${tabVisible ? ' visible' : ''}`}
+        className={`section detail shell${tabVisible ? ' visible' : ''}`}
         id="project-detail"
         data-section="detail"
         key={activeProject}
       >
-        <div className="detail-tabs reveal">
-          {PROJECTS.map((p) => (
-            <button
-              key={p.id}
-              className={p.id === activeProject ? 'active' : ''}
-              style={p.id === activeProject ? { '--accent': p.accent } : undefined}
-              onClick={() => selectProject(p.id)}
-            >
-              {p.name}
-            </button>
-          ))}
+        <div className="rail">
+          <div>
+            <span className="idx">02</span> <span>Details</span>
+          </div>
+          <div className="detail-tabs" role="group" aria-label="Project">
+            {PROJECTS.map((p) => (
+              <button
+                key={p.id}
+                className={p.id === activeProject ? 'active' : ''}
+                aria-current={p.id === activeProject ? 'true' : undefined}
+                onClick={() => selectProject(p.id)}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="detail-hero reveal">
-          <div>
-            <div className="kicker" style={{ color: project.accent }}>
+        <div className="body">
+          <div className="detail-head reveal">
+            <div className="label">
               {project.tag} · {project.status}
             </div>
             <h2>{project.name}</h2>
@@ -612,183 +596,157 @@ export default function App() {
               <a className="button" href={project.repo} target="_blank" rel="noopener noreferrer">
                 GitHub ↗
               </a>
-              <button className="copy" onClick={copyClone}>
-                {copied ? 'Copied ✓' : 'Copy clone command'}
+              <button className="button ghost" onClick={copyClone}>
+                {copied ? 'Copied' : 'Copy clone command'}
               </button>
             </div>
             <div className="stack-row">
               {project.stack.map((s) => (
-                <span key={s} className="stack-pill">
-                  {s}
-                </span>
+                <span key={s}>{s}</span>
               ))}
             </div>
           </div>
-          <div className="spec-grid">
+
+          <div className="specs reveal">
             {project.specs.map(([val, label]) => (
-              <div key={label} className="spec-cell">
+              <div key={label} className="spec">
                 <b>{val}</b>
                 <span>{label}</span>
               </div>
             ))}
           </div>
-        </div>
 
-        <div className="highlights">
-          {project.highlights.map((h, i) => (
-            <div key={h.title} className={`highlight reveal delay-${Math.min(i + 1, 3)}`}>
-              <div className="h-icon" style={{ color: project.accent }}>
-                {h.icon}
-              </div>
-              <div>
+          <div className="highlights">
+            {project.highlights.map((h) => (
+              <div key={h.title} className="highlight reveal">
                 <h4>{h.title}</h4>
                 <p>{h.text}</p>
               </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="ops reveal">
-          <div className="terminal" style={{ '--accent': project.accent }}>
-            <div className="terminal-bar"><i /><i /><i /><span>quickstart</span></div>
-            <pre>{project.quickstart.map((l, i) => (
-              <div key={i} className={l.startsWith('#') ? 'dim' : undefined}>
-                {!l.startsWith('#') && !l.startsWith('OBS') && <b>$ </b>}{l}
-              </div>
-            ))}</pre>
+            ))}
           </div>
-          <dl className="facts">
-            {project.facts.map(([k, v]) => (
-              <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
-            ))}
-          </dl>
-        </div>
 
-        {project.roadmap && (
-          <ol className="roadmap reveal" style={{ '--accent': project.accent }}>
-            {project.roadmap.map(([t, st], i) => (
-              <li key={t} className={`rm-${st}`}>
-                <span className="rm-n">{i + 1}</span>
-                <span className="rm-t">{t}</span>
-                <span className="rm-s">{st}</span>
-              </li>
-            ))}
-          </ol>
-        )}
+          <div className="sub reveal">
+            <span className="label">Setup</span>
+            <div className="ops">
+              <div>
+                <h5>Quickstart</h5>
+                <div className="terminal">
+                  <pre>{project.quickstart.map((l, i) => (
+                    <div key={i} className={l.startsWith('#') ? 'dim' : undefined}>
+                      {!l.startsWith('#') && !l.startsWith('OBS') && <b>$ </b>}{l}
+                    </div>
+                  ))}</pre>
+                </div>
+              </div>
+              <div>
+                <h5>Facts</h5>
+                <dl className="facts">
+                  {project.facts.map(([k, v]) => (
+                    <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+          </div>
 
-        {project.previews && (
-          <div className="shots reveal" style={{ '--accent': project.accent }}>
-            <div className="kicker">IN USE · REDRAWN FROM THE REAL UI</div>
-            <div className="shots-grid">
-              {project.previews.map((pv) => (
-                <figure key={pv.m} className={pv.wide ? 'wide' : undefined}>
-                  <Mock id={pv.m} cmds={project.commands} />
-                  <figcaption>{pv.cap}</figcaption>
-                </figure>
+          {project.roadmap && (
+            <div className="sub reveal">
+              <span className="label">Roadmap</span>
+              <ol className="roadmap">
+                {project.roadmap.map(([t, st], i) => (
+                  <li key={t} className={`rm-${st}`}>
+                    <span className="rm-n">{i + 1}</span>
+                    <span className="rm-t">{t}</span>
+                    <span className="rm-s">{st}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {project.previews && (
+            <div className="sub shots reveal">
+              <span className="label">Interface · redrawn from the real UI</span>
+              <div className="shots-grid">
+                {project.previews.map((pv) => (
+                  <figure key={pv.m} className={pv.wide ? 'wide' : undefined}>
+                    <Mock id={pv.m} cmds={project.commands} />
+                    <figcaption>{pv.cap}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="sub reveal">
+            <span className="label">Commands</span>
+            <div className="cmd-grid">
+              {project.commands.map(([cmd, desc]) => (
+                <div key={cmd} className="cmd-row">
+                  <code>{cmd}</code>
+                  <span>{desc}</span>
+                </div>
               ))}
             </div>
-          </div>
-        )}
-
-        <div className="commands-block reveal">
-          <div className="kicker">COMMANDS</div>
-          <h3>What you type in chat</h3>
-          <div className="cmd-grid">
-            {project.commands.map(([cmd, desc]) => (
-              <div key={cmd} className="cmd-row">
-                <code>{cmd}</code>
-                <span>{desc}</span>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Lineage ─────────────────────────────────────────── */}
-      <section className="lineage shell" data-section="lineage">
-        <div className="reveal">
-          <div className="kicker">02 / HOW THEY FIT</div>
-          <h2>Two platforms.<br /><em>One shared engine room.</em></h2>
+      {/* ── Relationships ───────────────────────────────────── */}
+      <Section n="03" label="Relationships" data-section="lineage" className="lineage">
+        <div className="section-head reveal">
+          <h2>How the projects relate</h2>
         </div>
         <div className="lineage-grid reveal">
           {LINKS.map(([a, b, why]) => (
             <div key={a + b} className="link-row">
-              <button onClick={() => selectProject(PROJECTS.find((p) => p.name === a).id)}>{a}</button>
-              <span className="link-arrow">⟷</span>
-              <button onClick={() => selectProject(PROJECTS.find((p) => p.name === b).id)}>{b}</button>
+              <div className="link-pair">
+                <button className="link" onClick={() => selectProject(PROJECTS.find((p) => p.name === a).id)}>{a}</button>
+                <span className="link-arrow">↔</span>
+                <button className="link" onClick={() => selectProject(PROJECTS.find((p) => p.name === b).id)}>{b}</button>
+              </div>
               <p>{why}</p>
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
-      {/* ── Philosophy ──────────────────────────────────────── */}
-      <section className="philosophy shell" data-section="philosophy">
+      {/* ── Approach ────────────────────────────────────────── */}
+      <Section n="04" label="Approach" data-section="philosophy" className="approach">
+        <div className="section-head reveal">
+          <h2>Runs on hardware you already have</h2>
+        </div>
         <div className="reveal">
-          <div className="kicker">03 / APPROACH</div>
-          <h2>
-            Built for the machine
-            <br />
-            <em>you already own.</em>
-          </h2>
+          {APPROACH.map(([title, text]) => (
+            <div key={title} className="principle">
+              <h4>{title}</h4>
+              <p>{text}</p>
+            </div>
+          ))}
         </div>
-        <div className="philo-grid">
-          <div className="philo-card reveal delay-1">
-            <h4>Local first</h4>
-            <p>
-              Everything runs on your hardware. Discord bots on a free-tier VPS, Twitch tools on the
-              same PC you stream from. No mandatory accounts, no cloud dependency.
-            </p>
-          </div>
-          <div className="philo-card reveal delay-2">
-            <h4>Respect the queue</h4>
-            <p>
-              Persistence, prefetch, gapless hand-over and clear skip rules. The music keeps going
-              when the process restarts or the network hiccups.
-            </p>
-          </div>
-          <div className="philo-card reveal delay-3">
-            <h4>Minimal footprint</h4>
-            <p>
-              From a Discord bot that fits in 1 GB RAM to a Rust radio aiming for single-digit
-              megabytes idle — the goal is headroom left for everything else.
-            </p>
-          </div>
-        </div>
-      </section>
+      </Section>
 
       {/* ── Closing ─────────────────────────────────────────── */}
-      <section className="closing shell reveal">
-        <div className="mark">
-          <img src={LOGO} alt="Pyxee" />
+      <Section n="05" label="Source" className="closing reveal">
+        <div className="section-head">
+          <h2>Get the code</h2>
+          <p className="prose">Clone a repository and follow its README. Licensed MIT or Unlicense, depending on the project.</p>
         </div>
-        <div className="kicker">OPEN SOURCE · MIT / UNLICENSE</div>
-        <h2>
-          Pick a tool.
-          <br />
-          <em>Make it yours.</em>
-        </h2>
-        <p>Clone any repo, follow the README, run it on your terms.</p>
         <div className="actions">
           <a className="button" href={project.repo} target="_blank" rel="noopener noreferrer">
             Open {project.name} ↗
           </a>
-          <a className="button ghost" href="https://github.com/Pylxyr" target="_blank" rel="noopener noreferrer">
-            All repositories
+          <a className="button ghost" href={GITHUB} target="_blank" rel="noopener noreferrer">
+            All repositories ↗
           </a>
         </div>
-      </section>
+      </Section>
 
       <footer className="footer shell">
-        <a className="brand" href="#top">
-          <img className="brand-logo" src={LOGO} alt="Pyxee" width="29" height="29" />
-          <span>
-            Pyxee<span>Suite</span>
-          </span>
-        </a>
-        <span>Made for late-night queues and live chats.</span>
+        <Brand />
+        <span>Open-source projects by Pylxyr.</span>
         <div>
-          <a href="https://github.com/Pylxyr" target="_blank" rel="noopener noreferrer">
+          <a href={GITHUB} target="_blank" rel="noopener noreferrer">
             GitHub ↗
           </a>
           <a href="https://github.com/Pylxyr/PyxeeBot/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">
